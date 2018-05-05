@@ -1,12 +1,11 @@
 package com.samourai.wallet.bip47.rpc;
 
-import com.samourai.wallet.SamouraiWallet;
 import com.samourai.wallet.hd.HD_Wallet;
-
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
-import org.bitcoinj.params.MainNetParams;
+
+import java.util.List;
 
 /**
  *
@@ -32,7 +31,23 @@ public class BIP47Wallet extends HD_Wallet {
 
         super(purpose, mc, params, seed, passphrase, nbAccounts);
 
-        mAccount = new BIP47Account(SamouraiWallet.getInstance().getCurrentNetworkParams(), mRoot, 0);
+        mAccount = new BIP47Account(params, mRoot, 0);
+
+    }
+
+    /**
+     * Constructor for wallet.
+     *
+     * @param int purpose
+     * @param HD_Wallet hdWallet to copy from
+     * @param int nbAccounts
+     *
+     */
+    public BIP47Wallet(int purpose, HD_Wallet hdWallet, int nbAccounts) {
+
+        super(purpose, hdWallet, nbAccounts);
+
+        mAccount = new BIP47Account(mParams, mRoot, 0);
 
     }
 

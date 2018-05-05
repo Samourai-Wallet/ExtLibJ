@@ -66,9 +66,15 @@ public class SegwitAddress {
         this.ecKey = ecKey;
     }
 
+    public Address getAddress()    {
+
+        return Address.fromP2SHScript(params, segWitOutputScript());
+
+    }
+
     public String getAddressAsString()    {
 
-        return Address.fromP2SHScript(params, segWitOutputScript()).toString();
+        return getAddress().toString();
 
     }
 

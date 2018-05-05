@@ -1,16 +1,15 @@
 package com.samourai.wallet.bip47.rpc;
 
-import com.samourai.wallet.SamouraiWallet;
 import com.samourai.wallet.hd.HD_Address;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.params.MainNetParams;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -67,12 +66,12 @@ public class PaymentCode {
         strPaymentCode = makeV1();
     }
 
-    public HD_Address notificationAddress() throws AddressFormatException {
-        return addressAt(0);
+    public HD_Address notificationAddress(NetworkParameters params) throws AddressFormatException {
+        return addressAt(0, params);
     }
 
-    public HD_Address addressAt(int idx) throws AddressFormatException {
-        return new BIP47Account(SamouraiWallet.getInstance().getCurrentNetworkParams(), strPaymentCode).addressAt(idx);
+    public HD_Address addressAt(int idx, NetworkParameters params) throws AddressFormatException {
+        return new BIP47Account(params, strPaymentCode).addressAt(idx);
     }
 
     public byte[] getPayload() throws AddressFormatException    {

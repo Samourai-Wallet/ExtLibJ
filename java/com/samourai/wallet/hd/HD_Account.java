@@ -1,6 +1,5 @@
 package com.samourai.wallet.hd;
 
-import com.samourai.wallet.SamouraiWallet;
 import com.samourai.wallet.util.FormatsUtil;
 
 import org.bitcoinj.core.AddressFormatException;
@@ -10,7 +9,6 @@ import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 
-import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,9 +43,9 @@ public class HD_Account {
         childnum |= ChildNumber.HARDENED_BIT;
         aKey = HDKeyDerivation.deriveChildKey(mKey, childnum);
 
-        strXPUB = aKey.serializePubB58(SamouraiWallet.getInstance().getCurrentNetworkParams());
-        strYPUB = aKey.serializePubB58(SamouraiWallet.getInstance().getCurrentNetworkParams(), 49);
-        strZPUB = aKey.serializePubB58(SamouraiWallet.getInstance().getCurrentNetworkParams(), 84);
+        strXPUB = aKey.serializePubB58(params);
+        strYPUB = aKey.serializePubB58(params, 49);
+        strZPUB = aKey.serializePubB58(params, 84);
 
         mReceive = new HD_Chain(mParams, aKey, true);
         mChange = new HD_Chain(mParams, aKey, false);

@@ -1,8 +1,10 @@
 package com.samourai.wallet.bip47.rpc;
 
+import com.samourai.wallet.segwit.SegwitAddress;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
 
+import org.bitcoinj.core.NetworkParameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -20,16 +22,18 @@ public class PaymentAddress {
     private PaymentCode paymentCode = null;
     private int index = 0;
     private byte[] privKey = null;
+    private NetworkParameters params;
 
     private static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
     private static final ECDomainParameters CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
 
     private PaymentAddress()    { ; }
 
-    public PaymentAddress(PaymentCode paymentCode, int index, byte[] privKey) throws AddressFormatException {
+    public PaymentAddress(PaymentCode paymentCode, int index, byte[] privKey, NetworkParameters params) throws AddressFormatException {
         this.paymentCode = paymentCode;
         this.index = index;
         this.privKey = privKey;
+        this.params = params;
     }
 
     public ECKey getSendECKey() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException, NotSecp256k1Exception {
@@ -49,7 +53,7 @@ public class PaymentAddress {
     }
 
     public ECPoint getECPoint() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException    {
-        ECKey ecKey = ECKey.fromPublicOnly(paymentCode.addressAt(index).getPubKey());
+        ECKey ecKey = ECKey.fromPublicOnly(paymentCode.addressAt(index, params).getPubKey());
         return ecKey.getPubKeyPoint();
     }
 
@@ -57,6 +61,16 @@ public class PaymentAddress {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(getSharedSecret().ECDHSecretAsBytes());
         return hash;
+    }
+
+    public SegwitAddress getSegwitAddressSend() throws Exception {
+        SegwitAddress segwitAddress = new SegwitAddress(getSendECKey().getPubKey(), params);
+        return segwitAddress;
+    }
+
+    public SegwitAddress getSegwitAddressReceive() throws Exception {
+        SegwitAddress segwitAddress = new SegwitAddress(getReceiveECKey(), params);
+        return segwitAddress;
     }
 
     private ECPoint get_sG(BigInteger s) {
@@ -88,7 +102,7 @@ public class PaymentAddress {
     }
 
     private SecretPoint sharedSecret() throws AddressFormatException, InvalidKeySpecException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, NoSuchProviderException {
-        return new SecretPoint(privKey, paymentCode.addressAt(index).getPubKey());
+        return new SecretPoint(privKey, paymentCode.addressAt(index, params).getPubKey());
     }
 
     private boolean isSecp256k1(BigInteger b) {

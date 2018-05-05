@@ -1,17 +1,12 @@
 package com.samourai.wallet.util;
 
-import android.util.Patterns;
-
-import com.samourai.wallet.SamouraiWallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.segwit.bech32.Bech32;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.WrongNetworkException;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 import org.bouncycastle.util.encoders.Hex;
@@ -19,12 +14,8 @@ import org.bouncycastle.util.encoders.Hex;
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-//import android.util.Log;
 
 public class FormatsUtil {
-
-	private Pattern emailPattern = Patterns.EMAIL_ADDRESS;
-	private Pattern phonePattern = Pattern.compile("(\\+[1-9]{1}[0-9]{1,2}+|00[1-9]{1}[0-9]{1,2}+)[\\(\\)\\.\\-\\s\\d]{6,16}");
 
 	private String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?$)";
 	private String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$";
@@ -41,8 +32,6 @@ public class FormatsUtil {
 
 	private static FormatsUtil instance = null;
 
-	private FormatsUtil() { ; }
-
 	public static FormatsUtil getInstance() {
 
 		if(instance == null) {
@@ -52,9 +41,9 @@ public class FormatsUtil {
 		return instance;
 	}
 
-	public String validateBitcoinAddress(final String address) {
+	public String validateBitcoinAddress(final String address, final NetworkParameters params) {
 
-		if(isValidBitcoinAddress(address)) {
+		if(isValidBitcoinAddress(address, params)) {
 			return address;
 		}
 		else {
@@ -172,13 +161,18 @@ public class FormatsUtil {
 		return ret;
 	}
 
-	public boolean isValidBitcoinAddress(final String address) {
+	public boolean isTestNet(NetworkParameters params) {
+		return params != null && !(params instanceof MainNetParams);
+	}
+
+	public boolean isValidBitcoinAddress(final String address, NetworkParameters params) {
 
 		boolean ret = false;
 		Address addr = null;
+		boolean isTestNet = isTestNet(params);
 
-		if((!SamouraiWallet.getInstance().isTestNet() && address.toLowerCase().startsWith("bc")) ||
-				(SamouraiWallet.getInstance().isTestNet() && address.toLowerCase().startsWith("tb")))	{
+		if((!isTestNet && address.toLowerCase().startsWith("bc")) ||
+				(isTestNet && address.toLowerCase().startsWith("tb")))	{
 
 			try	{
 				Pair<Byte, byte[]> pair = Bech32Segwit.decode(address.substring(0, 2), address);
@@ -197,7 +191,7 @@ public class FormatsUtil {
 		else	{
 
 			try {
-				addr = new Address(SamouraiWallet.getInstance().getCurrentNetworkParams(), address);
+				addr = new Address(params, address);
 				if(addr != null) {
 					ret = true;
 				}
