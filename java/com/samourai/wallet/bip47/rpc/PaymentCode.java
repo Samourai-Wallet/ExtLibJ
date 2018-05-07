@@ -29,7 +29,7 @@ public class PaymentCode {
     private static final int CHAIN_LEN = 32;
     private static final int PAYLOAD_LEN = 80;
 
-    private static final int SAMOURAI_SEGWIT_BYTE = 79;
+    private static final int SAMOURAI_FEATURE_BYTE = 79;
     private static final int SAMOURAI_SEGWIT_BIT = 0;
 
     private String strPaymentCode = null;
@@ -206,7 +206,7 @@ public class PaymentCode {
 
         byte[] payload = getPayload();
         // set bit0 = 1 in 'Samourai byte' for segwit. Can send/receive P2PKH, P2SH-P2WPKH, P2WPKH (bech32)
-        payload[SAMOURAI_SEGWIT_BYTE] = setBit(payload[SAMOURAI_SEGWIT_BYTE], SAMOURAI_SEGWIT_BIT);
+        payload[SAMOURAI_FEATURE_BYTE] = setBit(payload[SAMOURAI_FEATURE_BYTE], SAMOURAI_SEGWIT_BIT);
         byte[] payment_code = new byte[PAYLOAD_LEN + 1];
         // add version byte
         payment_code[0] = (byte)0x47;
