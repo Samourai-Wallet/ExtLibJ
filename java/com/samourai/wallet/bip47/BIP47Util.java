@@ -32,6 +32,11 @@ public class BIP47Util {
         return new com.samourai.wallet.bip47.rpc.PaymentCode(payment_code);
     }
 
+    public PaymentCode getFeaturePaymentCode(BIP47Wallet wallet) throws AddressFormatException   {
+        PaymentCode payment_code = getPaymentCode(wallet);
+        return new com.samourai.wallet.bip47.rpc.PaymentCode(payment_code.makeSamouraiPaymentCode());
+    }
+
     public PaymentAddress getReceiveAddress(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception {
         HD_Address address = wallet.getAccount(0).addressAt(idx);
         return getPaymentAddress(pcode, 0, address, params);
