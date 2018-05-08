@@ -9,6 +9,7 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
+import org.bouncycastle.util.encoders.Hex;
 
 public class BIP47Util {
 
@@ -40,6 +41,11 @@ public class BIP47Util {
     public PaymentAddress getReceiveAddress(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception {
         HD_Address address = wallet.getAccount(0).addressAt(idx);
         return getPaymentAddress(pcode, 0, address, params);
+    }
+
+    public String getReceivePubKey(BIP47Wallet wallet, PaymentCode pcode, int idx) throws AddressFormatException    {
+        HD_Address address = wallet.getAccount(0).addressAt(idx);
+        return Hex.toHexString(address.getECKey().getPubKey());
     }
 
     public PaymentAddress getSendAddress(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception {
