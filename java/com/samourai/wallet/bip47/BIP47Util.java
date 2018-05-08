@@ -53,6 +53,11 @@ public class BIP47Util {
         return getPaymentAddress(pcode, idx, address, params);
     }
 
+    public String getSendPubKey(BIP47Wallet wallet, PaymentCode pcode, int idx) throws AddressFormatException, NotSecp256k1Exception {
+        HD_Address address = wallet.getAccount(0).addressAt(0);
+        return Hex.toHexString(address.getECKey().getPubKey());
+    }
+
     public byte[] getIncomingMask(BIP47Wallet wallet, byte[] pubkey, byte[] outPoint, NetworkParameters params) throws AddressFormatException, Exception    {
 
         HD_Address notifAddress = getNotificationAddress(wallet);
