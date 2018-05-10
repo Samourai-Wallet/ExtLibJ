@@ -9,6 +9,12 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
+import org.bouncycastle.util.encoders.Hex;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 public class BIP47Util {
 
@@ -32,14 +38,29 @@ public class BIP47Util {
         return new com.samourai.wallet.bip47.rpc.PaymentCode(payment_code);
     }
 
+    public com.samourai.wallet.bip47.rpc.PaymentCode getFeaturePaymentCode(BIP47Wallet wallet) throws AddressFormatException   {
+        PaymentCode payment_code = getPaymentCode(wallet);
+        return new com.samourai.wallet.bip47.rpc.PaymentCode(payment_code.makeSamouraiPaymentCode());
+    }
+
     public PaymentAddress getReceiveAddress(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception {
         HD_Address address = wallet.getAccount(0).addressAt(idx);
         return getPaymentAddress(pcode, 0, address, params);
     }
 
+    public String getReceivePubKey(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        PaymentAddress paymentAddress = getReceiveAddress(wallet, pcode, idx, params);
+        return Hex.toHexString(paymentAddress.getReceiveECKey().getPubKey());
+    }
+
     public PaymentAddress getSendAddress(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception {
         HD_Address address = wallet.getAccount(0).addressAt(0);
         return getPaymentAddress(pcode, idx, address, params);
+    }
+
+    public String getSendPubKey(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        PaymentAddress paymentAddress = getSendAddress(wallet, pcode, idx, params);
+        return Hex.toHexString(paymentAddress.getSendECKey().getPubKey());
     }
 
     public byte[] getIncomingMask(BIP47Wallet wallet, byte[] pubkey, byte[] outPoint, NetworkParameters params) throws AddressFormatException, Exception    {
