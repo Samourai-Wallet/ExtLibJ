@@ -18,16 +18,6 @@
 			<version>20180130</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.google.guava</groupId>
-		    <artifactId>guava</artifactId>
-		    <version>20.0</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-api</artifactId>
-		    <version>1.7.25</version>
-		</dependency>
-		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-launcher</artifactId>
 			<version>1.2.0</version>
@@ -40,31 +30,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<version>5.2.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.59</version>
-			<scope>compile</scope>
-		</dependency>
-<!--
-		<dependency>
 			<groupId>org.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
 			<version>0.15-Segwit-Samourai-003</version>
 		</dependency>
--->
-		<dependency>
-			<groupId>org.bitcoinj</groupId>
-		  <artifactId>bitcoinj-parent</artifactId>
-		  <version>0.15-Segwit-Samourai-003</version>
-        <scope>system</scope>
-        <systemPath>${basedir}/libs/bitcoinj-core-0.15-Segwit-Samourai-003.jar</systemPath>
-    </dependency>
 	</dependencies>
 
 	<build>

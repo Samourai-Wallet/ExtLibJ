@@ -6,8 +6,8 @@ import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.utils.TestUtils;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class PaymentCodeTest {
     private static final NetworkParameters params = TestNet3Params.get();
@@ -35,8 +35,8 @@ public class PaymentCodeTest {
         SegwitAddress receiveAddress2 = bip47Util.getReceiveAddress(bip47Wallet2, paymentCode1, idx, params).getSegwitAddressReceive();
 
         // mutual confrontation should give same result
-        Assert.assertEquals(sendAddress1.getBech32AsString(), receiveAddress2.getBech32AsString());
-        Assert.assertEquals(receiveAddress1.getBech32AsString(), sendAddress2.getBech32AsString());
+        Assertions.assertEquals(sendAddress1.getBech32AsString(), receiveAddress2.getBech32AsString());
+        Assertions.assertEquals(receiveAddress1.getBech32AsString(), sendAddress2.getBech32AsString());
     }
 
 }
