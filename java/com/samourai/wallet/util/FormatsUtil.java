@@ -6,6 +6,8 @@ import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
@@ -293,6 +295,30 @@ public class FormatsUtil {
 			return false;
 		}
 
+	}
+
+	public DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
+
+		byte[] xpubBytes = Base58.decodeChecked(xpubstr);
+
+		ByteBuffer bb = ByteBuffer.wrap(xpubBytes);
+		int version = bb.getInt();
+		if(version != FormatsUtil.MAGIC_XPUB && version != FormatsUtil.MAGIC_TPUB && version != FormatsUtil.MAGIC_YPUB && version != FormatsUtil.MAGIC_UPUB && version != FormatsUtil.MAGIC_ZPUB && version != FormatsUtil.MAGIC_VPUB)   {
+			throw new AddressFormatException("invalid xpub version");
+		}
+
+		byte[] chain = new byte[32];
+		byte[] pub = new byte[33];
+		// depth:
+		bb.get();
+		// parent fingerprint:
+		bb.getInt();
+		// child no.
+		bb.getInt();
+		bb.get(chain);
+		bb.get(pub);
+
+		return HDKeyDerivation.createMasterPubKeyFromBytes(pub, chain);
 	}
 
 }

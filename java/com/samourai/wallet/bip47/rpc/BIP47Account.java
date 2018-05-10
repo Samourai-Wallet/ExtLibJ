@@ -51,7 +51,7 @@ public class BIP47Account extends HD_Account {
             strPaymentCode = data;
         }
         else if(FormatsUtil.getInstance().isValidXpub(data))  {
-            aKey = createMasterPubKeyFromXPub(data);
+            aKey = FormatsUtil.getInstance().createMasterPubKeyFromXPub(data);
             strXPUB = data;
             strPaymentCode = createPaymentCodeFromAccountKey();
         }

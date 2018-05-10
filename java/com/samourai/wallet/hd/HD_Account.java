@@ -19,7 +19,6 @@ public class HD_Account {
     protected DeterministicKey aKey = null;
     private String strLabel = null;
     protected int mAID;
-    private boolean isArchived = false;
 
     private HD_Chain mReceive = null;
     private HD_Chain mChange = null;
@@ -59,37 +58,13 @@ public class HD_Account {
         mAID = child;
 
         // assign master key to account key
-        aKey = createMasterPubKeyFromXPub(xpub);
+        aKey = FormatsUtil.getInstance().createMasterPubKeyFromXPub(xpub);
 
         strXPUB = strYPUB = strZPUB = xpub;
 
         mReceive = new HD_Chain(mParams, aKey, true);
         mChange = new HD_Chain(mParams, aKey, false);
 
-    }
-
-    protected DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
-
-        byte[] xpubBytes = Base58.decodeChecked(xpubstr);
-
-        ByteBuffer bb = ByteBuffer.wrap(xpubBytes);
-        int version = bb.getInt();
-        if(version != FormatsUtil.MAGIC_XPUB && version != FormatsUtil.MAGIC_TPUB && version != FormatsUtil.MAGIC_YPUB && version != FormatsUtil.MAGIC_UPUB && version != FormatsUtil.MAGIC_ZPUB && version != FormatsUtil.MAGIC_VPUB)   {
-            throw new AddressFormatException("invalid xpub version");
-        }
-
-        byte[] chain = new byte[32];
-        byte[] pub = new byte[33];
-        // depth:
-        bb.get();
-        // parent fingerprint:
-        bb.getInt();
-        // child no.
-        bb.getInt();
-        bb.get(chain);
-        bb.get(pub);
-
-        return HDKeyDerivation.createMasterPubKeyFromBytes(pub, chain);
     }
 
     public String xpubstr() {
