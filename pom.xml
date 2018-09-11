@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.samouraiwallet</groupId>
 	<artifactId>ext-lib-j</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-whirlpool-SNAPSHOT</version>
 	<name>ext-lib-j</name>
 	<dependencies>
 		<dependency>
