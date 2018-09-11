@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>com.github.Samourai-Wallet.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
-			<version>develop-001-g78dc595-15</version>
+			<version>001-whirlpool</version>
 		</dependency>
 	</dependencies>
 	<build>
