@@ -1,6 +1,5 @@
 package com.samourai.wallet.segwit.bech32;
 
-import com.samourai.wallet.util.FormatsUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -11,16 +10,16 @@ import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.script.Script;
 
-public class Bech32Util {
+public class Bech32UtilGeneric {
 
-    private static Bech32Util instance = null;
+    private static Bech32UtilGeneric instance = null;
 
-    private Bech32Util() { ; }
+    private Bech32UtilGeneric() { ; }
 
-    public static Bech32Util getInstance() {
+    public static Bech32UtilGeneric getInstance() {
 
         if(instance == null) {
-            instance = new Bech32Util();
+            instance = new Bech32UtilGeneric();
         }
 
         return instance;
