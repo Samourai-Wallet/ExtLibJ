@@ -1,6 +1,7 @@
 package com.samourai.wallet.bip47.rpc;
 
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
+import com.samourai.wallet.bip47.rpc.secretPoint.SecretPointFactory;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.utils.TestUtils;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.Test;
 public class PaymentCodeTest {
     private static final NetworkParameters params = TestNet3Params.get();
     private static final BIP47UtilGeneric bip47Util = BIP47UtilGeneric.getInstance();
+
+    private SecretPointFactory secretPointFactory = new SecretPointFactory();
 
     @Test
     public void testPaymentCode() throws Exception {
@@ -27,12 +30,12 @@ public class PaymentCodeTest {
         int idx = 0;
 
         // calculate send addresses
-        SegwitAddress sendAddress1 = bip47Util.getSendAddress(bip47Wallet1, paymentCode2, idx, params).getSegwitAddressSend();
-        SegwitAddress sendAddress2 = bip47Util.getSendAddress(bip47Wallet2, paymentCode1, idx, params).getSegwitAddressSend();
+        SegwitAddress sendAddress1 = bip47Util.getSendAddress(bip47Wallet1, paymentCode2, idx, params).getSegwitAddressSend(secretPointFactory);
+        SegwitAddress sendAddress2 = bip47Util.getSendAddress(bip47Wallet2, paymentCode1, idx, params).getSegwitAddressSend(secretPointFactory);
 
         // calculate receive addresses
-        SegwitAddress receiveAddress1 = bip47Util.getReceiveAddress(bip47Wallet1, paymentCode2, idx, params).getSegwitAddressReceive();
-        SegwitAddress receiveAddress2 = bip47Util.getReceiveAddress(bip47Wallet2, paymentCode1, idx, params).getSegwitAddressReceive();
+        SegwitAddress receiveAddress1 = bip47Util.getReceiveAddress(bip47Wallet1, paymentCode2, idx, params).getSegwitAddressReceive(secretPointFactory);
+        SegwitAddress receiveAddress2 = bip47Util.getReceiveAddress(bip47Wallet2, paymentCode1, idx, params).getSegwitAddressReceive(secretPointFactory);
 
         // mutual confrontation should give same result
         Assertions.assertEquals(sendAddress1.getBech32AsString(), receiveAddress2.getBech32AsString());
