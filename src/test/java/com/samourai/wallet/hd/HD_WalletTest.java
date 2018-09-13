@@ -1,6 +1,5 @@
 package com.samourai.wallet.hd;
 
-import com.samourai.wallet.bip47.BIP47Util;
 import com.samourai.wallet.utils.TestUtils;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;

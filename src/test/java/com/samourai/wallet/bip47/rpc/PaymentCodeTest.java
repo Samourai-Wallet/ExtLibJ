@@ -1,6 +1,6 @@
 package com.samourai.wallet.bip47.rpc;
 
-import com.samourai.wallet.bip47.BIP47Util;
+import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.utils.TestUtils;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 public class PaymentCodeTest {
     private static final NetworkParameters params = TestNet3Params.get();
-    private static final BIP47Util bip47Util = BIP47Util.getInstance();
+    private static final BIP47UtilGeneric bip47Util = BIP47UtilGeneric.getInstance();
 
     @Test
     public void testPaymentCode() throws Exception {

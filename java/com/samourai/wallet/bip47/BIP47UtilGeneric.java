@@ -16,14 +16,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
-public class BIP47Util {
+public class BIP47UtilGeneric {
 
-    private static BIP47Util instance = null;
+    private static BIP47UtilGeneric instance = null;
 
-    public static BIP47Util getInstance() {
+    public static BIP47UtilGeneric getInstance() {
 
         if(instance == null) {
-            instance = new BIP47Util();
+            instance = new BIP47UtilGeneric();
         }
 
         return instance;
