@@ -1,5 +1,6 @@
-package com.samourai.wallet.bip47.rpc.secretPoint;
+package com.samourai.wallet.bip47.rpc.impl;
 
+import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;

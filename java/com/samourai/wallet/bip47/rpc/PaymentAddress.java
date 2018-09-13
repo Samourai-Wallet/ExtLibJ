@@ -5,7 +5,6 @@ import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPointFactory;
 import com.samourai.wallet.segwit.SegwitAddress;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
-
 import org.bitcoinj.core.NetworkParameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
@@ -13,14 +12,15 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
 public class PaymentAddress {
 
+    private static ISecretPointFactory secretPointFactory;
     private PaymentCode paymentCode = null;
     private int index = 0;
     private byte[] privKey = null;
@@ -31,27 +31,30 @@ public class PaymentAddress {
 
     private PaymentAddress()    { ; }
 
-    public PaymentAddress(PaymentCode paymentCode, int index, byte[] privKey, NetworkParameters params) throws AddressFormatException {
+    public PaymentAddress(PaymentCode paymentCode, int index, byte[] privKey, NetworkParameters params, ISecretPointFactory secretPointFactory) throws AddressFormatException {
         this.paymentCode = paymentCode;
         this.index = index;
         this.privKey = privKey;
         this.params = params;
+        if (PaymentAddress.secretPointFactory == null) {
+            PaymentAddress.secretPointFactory = secretPointFactory;
+        }
     }
 
-    public ECKey getSendECKey(ISecretPointFactory secretPointFactory) throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException, NotSecp256k1Exception {
-        return getSendECKey(getSecretPoint(secretPointFactory));
+    public ECKey getSendECKey() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException, NotSecp256k1Exception {
+        return getSendECKey(getSecretPoint());
     }
 
-    public ECKey getReceiveECKey(ISecretPointFactory secretPointFactory) throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException, NotSecp256k1Exception {
-        return getReceiveECKey(getSecretPoint(secretPointFactory));
+    public ECKey getReceiveECKey() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException, NotSecp256k1Exception {
+        return getReceiveECKey(getSecretPoint());
     }
 
-    public ISecretPoint getSharedSecret(ISecretPointFactory secretPointFactory) throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException   {
-        return sharedSecret(secretPointFactory);
+    public ISecretPoint getSharedSecret() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException   {
+        return sharedSecret();
     }
 
-    public BigInteger getSecretPoint(ISecretPointFactory secretPointFactory) throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException, NotSecp256k1Exception    {
-        return secretPoint(secretPointFactory);
+    public BigInteger getSecretPoint() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException, NotSecp256k1Exception    {
+        return secretPoint();
     }
 
     public ECPoint getECPoint() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException    {
@@ -59,19 +62,19 @@ public class PaymentAddress {
         return ecKey.getPubKeyPoint();
     }
 
-    public byte[] hashSharedSecret(ISecretPointFactory secretPointFactory) throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException {
+    public byte[] hashSharedSecret() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, InvalidKeySpecException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(getSharedSecret(secretPointFactory).ECDHSecretAsBytes());
+        byte[] hash = digest.digest(getSharedSecret().ECDHSecretAsBytes());
         return hash;
     }
 
-    public SegwitAddress getSegwitAddressSend(ISecretPointFactory secretPointFactory) throws Exception {
-        SegwitAddress segwitAddress = new SegwitAddress(getSendECKey(secretPointFactory).getPubKey(), params);
+    public SegwitAddress getSegwitAddressSend() throws Exception {
+        SegwitAddress segwitAddress = new SegwitAddress(getSendECKey().getPubKey(), params);
         return segwitAddress;
     }
 
-    public SegwitAddress getSegwitAddressReceive(ISecretPointFactory secretPointFactory) throws Exception {
-        SegwitAddress segwitAddress = new SegwitAddress(getReceiveECKey(secretPointFactory), params);
+    public SegwitAddress getSegwitAddressReceive() throws Exception {
+        SegwitAddress segwitAddress = new SegwitAddress(getReceiveECKey(), params);
         return segwitAddress;
     }
 
@@ -103,7 +106,7 @@ public class PaymentAddress {
         return ret;
     }
 
-    private ISecretPoint sharedSecret(ISecretPointFactory secretPointFactory) throws AddressFormatException, InvalidKeySpecException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, NoSuchProviderException {
+    private ISecretPoint sharedSecret() throws AddressFormatException, InvalidKeySpecException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, NoSuchProviderException {
         return secretPointFactory.newSecretPoint(privKey, paymentCode.addressAt(index, params).getPubKey());
     }
 
@@ -116,11 +119,11 @@ public class PaymentAddress {
         return true;
     }
 
-    private BigInteger secretPoint(ISecretPointFactory secretPointFactory) throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, NotSecp256k1Exception  {
+    private BigInteger secretPoint() throws AddressFormatException, InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, NotSecp256k1Exception  {
         //
         // convert hash to value 's'
         //
-        BigInteger s = new BigInteger(1, hashSharedSecret(secretPointFactory));
+        BigInteger s = new BigInteger(1, hashSharedSecret());
         //
         // check that 's' is on the secp256k1 curve
         //
