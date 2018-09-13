@@ -1,7 +1,7 @@
 package com.samourai.wallet.hd;
 
 import com.google.common.base.Joiner;
-import com.samourai.wallet.util.FormatsUtil;
+import com.samourai.wallet.util.FormatsUtilGeneric;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.*;
@@ -72,7 +72,7 @@ public class HD_Wallet {
         byte[] hd_seed = MnemonicCode.toSeed(mWordList, strPassphrase);
         DeterministicKey mKey = HDKeyDerivation.createMasterPrivateKey(hd_seed);
         DeterministicKey t1 = HDKeyDerivation.deriveChildKey(mKey, purpose|ChildNumber.HARDENED_BIT);
-        int coin = FormatsUtil.getInstance().isTestNet(params) ? (1 | ChildNumber.HARDENED_BIT) : ChildNumber.HARDENED_BIT;
+        int coin = FormatsUtilGeneric.getInstance().isTestNet(params) ? (1 | ChildNumber.HARDENED_BIT) : ChildNumber.HARDENED_BIT;
         DeterministicKey rootKey = HDKeyDerivation.deriveChildKey(t1, coin);
         return rootKey;
     }

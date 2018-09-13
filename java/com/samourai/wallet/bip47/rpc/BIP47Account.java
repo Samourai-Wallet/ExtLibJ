@@ -2,7 +2,7 @@ package com.samourai.wallet.bip47.rpc;
 
 import com.samourai.wallet.hd.HD_Account;
 import com.samourai.wallet.hd.HD_Address;
-import com.samourai.wallet.util.FormatsUtil;
+import com.samourai.wallet.util.FormatsUtilGeneric;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.NetworkParameters;
@@ -46,12 +46,12 @@ public class BIP47Account extends HD_Account {
         mAID = -1;
 
         // assign master key to account key
-        if(FormatsUtil.getInstance().isValidPaymentCode(data))  {
+        if(FormatsUtilGeneric.getInstance().isValidPaymentCode(data))  {
             aKey = createMasterPubKeyFromPaymentCode(data);
             strPaymentCode = data;
         }
-        else if(FormatsUtil.getInstance().isValidXpub(data))  {
-            aKey = FormatsUtil.getInstance().createMasterPubKeyFromXPub(data);
+        else if(FormatsUtilGeneric.getInstance().isValidXpub(data))  {
+            aKey = FormatsUtilGeneric.getInstance().createMasterPubKeyFromXPub(data);
             strXPUB = data;
             strPaymentCode = createPaymentCodeFromAccountKey();
         }

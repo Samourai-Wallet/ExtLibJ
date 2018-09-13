@@ -1,9 +1,8 @@
 package com.samourai.wallet.hd;
 
-import com.samourai.wallet.util.FormatsUtil;
+import com.samourai.wallet.util.FormatsUtilGeneric;
 
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -11,8 +10,6 @@ import org.bitcoinj.crypto.HDKeyDerivation;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.nio.ByteBuffer;
 
 public class HD_Account {
 
@@ -58,7 +55,7 @@ public class HD_Account {
         mAID = child;
 
         // assign master key to account key
-        aKey = FormatsUtil.getInstance().createMasterPubKeyFromXPub(xpub);
+        aKey = FormatsUtilGeneric.getInstance().createMasterPubKeyFromXPub(xpub);
 
         strXPUB = strYPUB = strZPUB = xpub;
 

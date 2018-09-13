@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FormatsUtil {
+public class FormatsUtilGeneric {
 
 	private String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?$)";
 	private String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$";
@@ -39,12 +39,12 @@ public class FormatsUtil {
 	public static final String XPUB = "^[xtyu]pub[1-9A-Za-z][^OIl]+$";
     public static final String HEX = "^[0-9A-Fa-f]+$";
 
-	private static FormatsUtil instance = null;
+	private static FormatsUtilGeneric instance = null;
 
-	public static FormatsUtil getInstance() {
+	public static FormatsUtilGeneric getInstance() {
 
 		if(instance == null) {
-			instance = new FormatsUtil();
+			instance = new FormatsUtilGeneric();
 		}
 
 		return instance;
@@ -338,7 +338,7 @@ public class FormatsUtil {
 
 		ByteBuffer bb = ByteBuffer.wrap(xpubBytes);
 		int version = bb.getInt();
-		if(version != FormatsUtil.MAGIC_XPUB && version != FormatsUtil.MAGIC_TPUB && version != FormatsUtil.MAGIC_YPUB && version != FormatsUtil.MAGIC_UPUB && version != FormatsUtil.MAGIC_ZPUB && version != FormatsUtil.MAGIC_VPUB)   {
+		if(version != FormatsUtilGeneric.MAGIC_XPUB && version != FormatsUtilGeneric.MAGIC_TPUB && version != FormatsUtilGeneric.MAGIC_YPUB && version != FormatsUtilGeneric.MAGIC_UPUB && version != FormatsUtilGeneric.MAGIC_ZPUB && version != FormatsUtilGeneric.MAGIC_VPUB)   {
 			throw new AddressFormatException("invalid xpub version");
 		}
 
