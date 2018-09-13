@@ -7,13 +7,20 @@ import java.util.Comparator;
 public class BIP69InputComparator implements Comparator<TransactionInput> {
 
     public int compare(TransactionInput i1, TransactionInput i2) {
+        byte[] h1 = i1.getOutpoint().getHash().getBytes();
+        byte[] h2 = i2.getOutpoint().getHash().getBytes();
+
+        long index1 = i1.getOutpoint().getIndex();
+        long index2 = i2.getOutpoint().getIndex();
+
+        return compare(h1, h2, index1, index2);
+    }
+
+    public int compare(byte[] h1, byte[] h2, long index1, long index2) {
 
         final int BEFORE = -1;
         final int EQUAL = 0;
         final int AFTER = 1;
-
-        byte[] h1 = i1.getOutpoint().getHash().getBytes();
-        byte[] h2 = i2.getOutpoint().getHash().getBytes();
 
         int pos = 0;
         while(pos < h1.length && pos < h2.length)    {
@@ -33,10 +40,10 @@ public class BIP69InputComparator implements Comparator<TransactionInput> {
 
         }
 
-        if(i1.getOutpoint().getIndex() < i2.getOutpoint().getIndex())    {
+        if(index1 < index2)    {
             return BEFORE;
         }
-        else if(i1.getOutpoint().getIndex() > i2.getOutpoint().getIndex())    {
+        else if(index1 > index2)    {
             return AFTER;
         }
         else    {
