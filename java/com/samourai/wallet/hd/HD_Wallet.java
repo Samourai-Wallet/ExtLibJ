@@ -1,6 +1,7 @@
 package com.samourai.wallet.hd;
 
 import com.google.common.base.Joiner;
+import com.samourai.wallet.util.FormatsUtil;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.*;
@@ -33,7 +34,7 @@ public class HD_Wallet {
         this(mSeed, strPassphrase, wordList, mParams);
 
         // compute rootKey for accounts
-        this.mRoot = computeRootKey(purpose, mWordList, strPassphrase);
+        this.mRoot = computeRootKey(purpose, mWordList, strPassphrase, mParams);
 
         // create accounts
         mAccounts = new ArrayList<HD_Account>();
@@ -44,7 +45,7 @@ public class HD_Wallet {
     }
 
     protected HD_Wallet(int purpose, HD_Wallet inputWallet, int nbAccounts) {
-        this(purpose, inputWallet.getWordList(), inputWallet.getNetworkParameters(), inputWallet.getSeed(), inputWallet.getPassphrase(), nbAccounts);
+        this(purpose, inputWallet.mWordList, inputWallet.mParams, inputWallet.mSeed, inputWallet.strPassphrase, nbAccounts);
     }
 
     /*
@@ -67,19 +68,18 @@ public class HD_Wallet {
         this.mParams = mParams;
     }
 
-    private static DeterministicKey computeRootKey(int purpose, List<String> mWordList, String strPassphrase) {
+    private static DeterministicKey computeRootKey(int purpose, List<String> mWordList, String strPassphrase, NetworkParameters params) {
         byte[] hd_seed = MnemonicCode.toSeed(mWordList, strPassphrase);
         DeterministicKey mKey = HDKeyDerivation.createMasterPrivateKey(hd_seed);
         DeterministicKey t1 = HDKeyDerivation.deriveChildKey(mKey, purpose|ChildNumber.HARDENED_BIT);
-        DeterministicKey rootKey = HDKeyDerivation.deriveChildKey(t1, ChildNumber.HARDENED_BIT);
+        int coin = FormatsUtil.getInstance().isTestNet(params) ? (1 | ChildNumber.HARDENED_BIT) : ChildNumber.HARDENED_BIT;
+        DeterministicKey rootKey = HDKeyDerivation.deriveChildKey(t1, coin);
         return rootKey;
     }
 
     public String getSeedHex() {
         return org.bouncycastle.util.encoders.Hex.toHexString(mSeed);
     }
-
-    public byte[] getSeed() { return mSeed; }
 
     public String getMnemonic() {
         return Joiner.on(" ").join(mWordList);
@@ -115,13 +115,5 @@ public class HD_Wallet {
         }
 
         return ret;
-    }
-
-    public NetworkParameters getNetworkParameters() {
-        return mParams;
-    }
-
-    public List<String> getWordList() {
-        return mWordList;
     }
 }

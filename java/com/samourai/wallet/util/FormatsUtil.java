@@ -29,6 +29,13 @@ public class FormatsUtil {
 	public static final int MAGIC_ZPUB = 0x04B24746;
 	public static final int MAGIC_VPUB = 0x045F1CF6;
 
+	public static final int MAGIC_XPRV = 0x0488ADE4;
+	public static final int MAGIC_TPRV = 0x04358394;
+	public static final int MAGIC_YPRV = 0x049D7878;
+	public static final int MAGIC_UPRV = 0x044A4E28;
+	public static final int MAGIC_ZPRV = 0x04B2430C;
+	public static final int MAGIC_VPRV = 0x045F18BC;
+
 	public static final String XPUB = "^[xtyu]pub[1-9A-Za-z][^OIl]+$";
     public static final String HEX = "^[0-9A-Fa-f]+$";
 
@@ -147,8 +154,7 @@ public class FormatsUtil {
 				if(matcher.find() && matcher.group(4) != null)    {
 					String amt = matcher.group(4);
 					try	{
-						double amount = Double.valueOf(amt);
-						return Long.toString((long)(amount * 1e8));
+						return Long.toString(Math.round(Double.valueOf(amt) * 1e8));
 					}
 					catch(NumberFormatException nfe)	{
 						ret = "0.0000";
@@ -241,6 +247,10 @@ public class FormatsUtil {
 		try {
 			byte[] xpubBytes = Base58.decodeChecked(xpub);
 
+			if(xpubBytes.length != 78)	{
+				return false;
+			}
+
 			ByteBuffer byteBuffer = ByteBuffer.wrap(xpubBytes);
 			int version = byteBuffer.getInt();
 			if(version != MAGIC_XPUB && version != MAGIC_TPUB && version != MAGIC_YPUB && version != MAGIC_UPUB && version != MAGIC_ZPUB && version != MAGIC_VPUB)   {
@@ -266,6 +276,31 @@ public class FormatsUtil {
 				}else{
 					return false;
 				}
+			}
+		}
+		catch(Exception e)	{
+			return false;
+		}
+	}
+
+	public boolean isValidXprv(String xprv){
+
+		try {
+			byte[] xprvBytes = Base58.decodeChecked(xprv);
+
+			if(xprvBytes.length != 78)	{
+				return false;
+			}
+
+			ByteBuffer byteBuffer = ByteBuffer.wrap(xprvBytes);
+			int version = byteBuffer.getInt();
+			if(version != MAGIC_XPRV && version != MAGIC_TPRV && version != MAGIC_YPRV && version != MAGIC_UPRV && version != MAGIC_ZPRV && version != MAGIC_VPRV)   {
+				throw new AddressFormatException("invalid version: " + xprv);
+			}
+			else	{
+
+				return true;
+
 			}
 		}
 		catch(Exception e)	{
