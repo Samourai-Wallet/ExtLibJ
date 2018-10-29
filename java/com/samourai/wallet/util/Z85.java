@@ -1,4 +1,4 @@
-package com.samourai.txtenna.utils;
+package com.samourai.wallet.util;
 
 public class Z85 {
 
