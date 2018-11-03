@@ -67,23 +67,9 @@ public class Bech32UtilGeneric {
         return Bech32Segwit.encode(hrp, (byte)0x00, scriptBytes);
     }
 
-    public TransactionOutput getTransactionOutput(String address, long value, NetworkParameters params) throws Exception    {
-
-        TransactionOutput output = null;
-
-        if(address.toLowerCase().startsWith("tb") || address.toLowerCase().startsWith("bc"))   {
-
-            try {
-                byte[] scriptPubKey = computeScriptPubKey(address, params);
-                output = new TransactionOutput(params, null, Coin.valueOf(value), scriptPubKey);
-            }
-            catch(Exception e) {
-                return null;
-            }
-
-        }
-
-        return output;
+    public TransactionOutput getTransactionOutput(String address, long value, NetworkParameters params) throws Exception {
+        byte[] scriptPubKey = computeScriptPubKey(address, params);
+        return new TransactionOutput(params, null, Coin.valueOf(value), scriptPubKey);
     }
 
     public byte[] computeScriptPubKey(String address, NetworkParameters params) throws Exception {
