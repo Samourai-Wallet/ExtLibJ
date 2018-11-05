@@ -1,5 +1,7 @@
 package com.samourai.wallet.segwit.bech32;
 
+import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.segwit.SegwitAddress;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -79,6 +81,10 @@ public class Bech32UtilGeneric {
 
         // get scriptPubkey
         return Bech32Segwit.getScriptPubkey(pair.getLeft(), pair.getRight());
+    }
+
+    public String toBech32(HD_Address hdAddress, NetworkParameters params) {
+        return new SegwitAddress(hdAddress.getPubKey(), params).getBech32AsString();
     }
 
 }
