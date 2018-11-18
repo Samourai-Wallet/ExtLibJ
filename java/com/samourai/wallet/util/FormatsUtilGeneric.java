@@ -334,13 +334,16 @@ public class FormatsUtilGeneric {
 
 	public DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
 
+		if(!isValidXpub(xpubstr))	{
+				return null;
+		}
+
 		byte[] xpubBytes = Base58.decodeChecked(xpubstr);
 
 		ByteBuffer bb = ByteBuffer.wrap(xpubBytes);
-		int version = bb.getInt();
-		if(version != FormatsUtilGeneric.MAGIC_XPUB && version != FormatsUtilGeneric.MAGIC_TPUB && version != FormatsUtilGeneric.MAGIC_YPUB && version != FormatsUtilGeneric.MAGIC_UPUB && version != FormatsUtilGeneric.MAGIC_ZPUB && version != FormatsUtilGeneric.MAGIC_VPUB)   {
-			throw new AddressFormatException("invalid xpub version");
-		}
+
+		// magic value
+		bb.getInt();
 
 		byte[] chain = new byte[32];
 		byte[] pub = new byte[33];
