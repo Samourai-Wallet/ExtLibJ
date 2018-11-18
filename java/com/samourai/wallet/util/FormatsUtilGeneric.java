@@ -356,4 +356,18 @@ public class FormatsUtilGeneric {
 		return HDKeyDerivation.createMasterPubKeyFromBytes(pub, chain);
 	}
 
+	public byte[] getFingerprintFromXPUB(String xpubstr) throws AddressFormatException {
+
+		if(!isValidXpub(xpubstr))	{
+				return null;
+		}
+
+		byte[] xpubBytes = Base58.decodeChecked(xpubstr);
+		// parent fingerprint:
+		byte[] fingerprint = new byte[4];
+		System.arraycopy(xpubBytes, 5, fingerprint, 0, fingerprint.length);
+
+		return fingerprint;
+	}
+
 }
