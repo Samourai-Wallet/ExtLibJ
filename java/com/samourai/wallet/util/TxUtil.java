@@ -35,6 +35,14 @@ public class TxUtil {
     tx.setWitness(inputIdx, witness);
   }
 
+  /*
+  public void verifySignInputSegwit(Transaction tx, int inputIdx) {
+    final ScriptBuilder sigScript = new ScriptBuilder();
+    sigScript.data(redeemScript.getProgram());
+    tx.getInput(inputIdx).setScriptSig(sigScript.build());
+    tx.getInput(inputIdx).getScriptSig().correctlySpends(tx, inputIdx, scriptPubKey, connectedOutput.getValue(), Script.ALL_VERIFY_FLAGS);
+  }*/
+
   public Integer findInputIndex(Transaction tx, String txoHash, long txoIndex) {
     for (int i = 0; i < tx.getInputs().size(); i++) {
       TransactionInput input = tx.getInput(i);

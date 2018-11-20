@@ -1,5 +1,6 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import java.security.SignatureException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -19,7 +20,7 @@ public class MessageSignUtilGeneric {
         return instance;
     }
 
-    public boolean verifySignedMessage(String address, String strMessage, String strSignature, NetworkParameters params) throws SignatureException {
+    public boolean verifySignedMessage(String address, String strMessage, String strSignature, NetworkParameters params) {
 
         if(address == null || strMessage == null || strSignature == null)    {
             return false;
@@ -27,7 +28,13 @@ public class MessageSignUtilGeneric {
 
         ECKey ecKey = signedMessageToKey(strMessage, strSignature);
         if(ecKey != null)   {
-            return ecKey.toAddress(params).toString().equals(address);
+            String toAddress;
+            if (FormatsUtilGeneric.getInstance().isValidBech32(address)) {
+                toAddress = Bech32UtilGeneric.getInstance().toBech32(ecKey.getPubKey(), params);
+            } else {
+                toAddress = ecKey.toAddress(params).toString();
+            }
+            return toAddress.equals(address);
         }
         else    {
             return false;
@@ -43,7 +50,7 @@ public class MessageSignUtilGeneric {
         return key.signMessage(strMessage);
     }
 
-    private String signMessageArmored(ECKey key, String strMessage, NetworkParameters params) {
+    public String signMessageArmored(ECKey key, String strMessage, NetworkParameters params) {
 
         String sig = signMessage(key, strMessage);
         String ret = null;
@@ -63,13 +70,17 @@ public class MessageSignUtilGeneric {
         return ret;
     }
 
-    private ECKey signedMessageToKey(String strMessage, String strSignature) throws SignatureException {
+    public ECKey signedMessageToKey(String strMessage, String strSignature) {
 
         if(strMessage == null || strSignature == null)    {
             return null;
         }
 
-        return ECKey.signedMessageToKey(strMessage, strSignature);
+        try {
+            return ECKey.signedMessageToKey(strMessage, strSignature);
+        } catch(SignatureException e) {
+            return null;
+        }
     }
 
 }
