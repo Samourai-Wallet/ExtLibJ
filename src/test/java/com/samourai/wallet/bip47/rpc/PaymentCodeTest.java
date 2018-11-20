@@ -1,10 +1,16 @@
 package com.samourai.wallet.bip47.rpc;
 
 import com.samourai.wallet.bip47.rpc.impl.Bip47Util;
+import com.samourai.wallet.bip47.rpc.impl.SecretPoint;
+import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
+import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.utils.TestUtils;
+import java.nio.ByteBuffer;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,6 +43,53 @@ public class PaymentCodeTest {
         // mutual confrontation should give same result
         Assertions.assertEquals(sendAddress1.getBech32AsString(), receiveAddress2.getBech32AsString());
         Assertions.assertEquals(receiveAddress1.getBech32AsString(), sendAddress2.getBech32AsString());
+    }
+
+    @Test
+    public void testXorMask() throws Exception {
+        SegwitAddress inputAddress = TestUtils.generateSegwitAddress(params);
+        TransactionOutPoint inputOutPoint = TestUtils.generateTransactionOutPoint(inputAddress.getBech32AsString(), 999999, params);
+        ECKey inputKey = inputAddress.getECKey();
+
+        byte[] data = ByteBuffer.allocate(64).putInt(1234).array();
+
+        ECKey secretWalletKey = new ECKey();
+
+        // mask
+        ISecretPoint secretPointMask = new SecretPoint(inputKey.getPrivKeyBytes(), secretWalletKey.getPubKey());
+        byte[] dataMasked = PaymentCode.xorMask(data, secretPointMask, inputOutPoint);
+
+        // unmask
+        ISecretPoint secretPointUnmask = new SecretPoint(secretWalletKey.getPrivKeyBytes(), inputKey.getPubKey());
+        byte[] dataUnmasked = PaymentCode.xorMask(dataMasked, secretPointUnmask, inputOutPoint);
+
+        // verify
+        Assertions.assertArrayEquals(data, dataUnmasked);
+    }
+
+    @Test
+    public void testXorMaskClientServer() throws Exception {
+        SegwitAddress inputAddress = TestUtils.generateSegwitAddress(params);
+        TransactionOutPoint inputOutPoint = TestUtils.generateTransactionOutPoint(inputAddress.getBech32AsString(), 999999, params);
+        ECKey inputKey = inputAddress.getECKey();
+
+        byte[] data = ByteBuffer.allocate(64).putInt(1234).array();
+
+        BIP47Wallet bip47Wallet = TestUtils.generateBip47Wallet(params);
+        String paymentCodeStr = bip47Wallet.getAccount(0).getPaymentCode();
+
+        // mask: client side
+        HD_Address notifAddressCli = new PaymentCode(paymentCodeStr).notificationAddress(params);
+        ISecretPoint secretPointMask = new SecretPoint(inputKey.getPrivKeyBytes(), notifAddressCli.getPubKey());
+        byte[] dataMasked = PaymentCode.xorMask(data, secretPointMask, inputOutPoint);
+
+        // unmask: server side
+        HD_Address notifAddressServer = bip47Wallet.getAccount(0).getNotificationAddress();
+        ISecretPoint secretPointUnmask = new SecretPoint(notifAddressServer.getECKey().getPrivKeyBytes(), inputKey.getPubKey());
+        byte[] dataUnmasked = PaymentCode.xorMask(dataMasked, secretPointUnmask, inputOutPoint);
+
+        // verify
+        Assertions.assertArrayEquals(data, dataUnmasked);
     }
 
 }
