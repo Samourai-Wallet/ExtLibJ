@@ -1,10 +1,9 @@
 package com.samourai.wallet.bip47.rpc;
 
-import com.samourai.wallet.bip47.rpc.impl.Bip47Util;
-import com.samourai.wallet.bip47.rpc.impl.SecretPoint;
+import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
+import com.samourai.wallet.bip47.rpc.java.SecretPointJava;
 import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
 import com.samourai.wallet.hd.HD_Address;
-import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.utils.TestUtils;
 import java.nio.ByteBuffer;
@@ -17,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 public class PaymentCodeTest {
     private static final NetworkParameters params = TestNet3Params.get();
-    private static final Bip47Util bip47Util = new Bip47Util();
+    private static final Bip47UtilJava bip47Util = Bip47UtilJava.getInstance();
 
     @Test
     public void testPaymentCode() throws Exception {
@@ -53,11 +52,11 @@ public class PaymentCodeTest {
         ECKey secretWalletKey = new ECKey();
 
         // mask
-        ISecretPoint secretPointMask = new SecretPoint(inputKey.getPrivKeyBytes(), secretWalletKey.getPubKey());
+        ISecretPoint secretPointMask = new SecretPointJava(inputKey.getPrivKeyBytes(), secretWalletKey.getPubKey());
         byte[] dataMasked = PaymentCode.xorMask(data, secretPointMask, inputOutPoint);
 
         // unmask
-        ISecretPoint secretPointUnmask = new SecretPoint(secretWalletKey.getPrivKeyBytes(), inputKey.getPubKey());
+        ISecretPoint secretPointUnmask = new SecretPointJava(secretWalletKey.getPrivKeyBytes(), inputKey.getPubKey());
         byte[] dataUnmasked = PaymentCode.xorMask(dataMasked, secretPointUnmask, inputOutPoint);
 
         // verify
@@ -77,12 +76,12 @@ public class PaymentCodeTest {
 
         // mask: client side
         HD_Address notifAddressCli = new PaymentCode(paymentCodeStr).notificationAddress(params);
-        ISecretPoint secretPointMask = new SecretPoint(inputKey.getPrivKeyBytes(), notifAddressCli.getPubKey());
+        ISecretPoint secretPointMask = new SecretPointJava(inputKey.getPrivKeyBytes(), notifAddressCli.getPubKey());
         byte[] dataMasked = PaymentCode.xorMask(data, secretPointMask, inputOutPoint);
 
         // unmask: server side
         HD_Address notifAddressServer = bip47Wallet.getAccount(0).getNotificationAddress();
-        ISecretPoint secretPointUnmask = new SecretPoint(notifAddressServer.getECKey().getPrivKeyBytes(), inputKey.getPubKey());
+        ISecretPoint secretPointUnmask = new SecretPointJava(notifAddressServer.getECKey().getPrivKeyBytes(), inputKey.getPubKey());
         byte[] dataUnmasked = PaymentCode.xorMask(dataMasked, secretPointUnmask, inputOutPoint);
 
         // verify

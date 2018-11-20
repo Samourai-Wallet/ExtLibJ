@@ -1,5 +1,6 @@
-package com.samourai.wallet.hd;
+package com.samourai.wallet.hd.java;
 
+import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import java.io.IOException;
 import java.io.InputStream;
 import org.bitcoinj.crypto.MnemonicCode;

@@ -1,4 +1,4 @@
-package com.samourai.wallet.bip47.rpc.impl;
+package com.samourai.wallet.bip47.rpc.java;
 
 import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
 import org.bouncycastle.jce.ECNamedCurveTable;
@@ -12,7 +12,7 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
-public class SecretPoint implements ISecretPoint {
+public class SecretPointJava implements ISecretPoint {
 
     private PrivateKey privKey = null;
     private PublicKey pubKey = null;
@@ -26,9 +26,9 @@ public class SecretPoint implements ISecretPoint {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
 
-    private SecretPoint()    { ; }
+    private SecretPointJava()    { ; }
 
-    public SecretPoint(byte[] dataPrv, byte[] dataPub) throws InvalidKeySpecException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, NoSuchProviderException {
+    public SecretPointJava(byte[] dataPrv, byte[] dataPub) throws InvalidKeySpecException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, NoSuchProviderException {
         kf = KeyFactory.getInstance("ECDH", KEY_PROVIDER);
         privKey = loadPrivateKey(dataPrv);
         pubKey = loadPublicKey(dataPub);

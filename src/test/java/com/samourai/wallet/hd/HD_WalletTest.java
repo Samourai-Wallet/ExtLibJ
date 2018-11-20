@@ -1,5 +1,6 @@
 package com.samourai.wallet.hd;
 
+import com.samourai.wallet.hd.java.HD_WalletFactoryJava;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
