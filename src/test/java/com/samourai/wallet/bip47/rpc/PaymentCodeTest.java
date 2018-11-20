@@ -21,11 +21,8 @@ public class PaymentCodeTest {
 
     @Test
     public void testPaymentCode() throws Exception {
-        HD_Wallet bip44Wallet1 = TestUtils.generateWallet(44, params);
-        HD_Wallet bip44Wallet2 = TestUtils.generateWallet(44, params);
-
-        BIP47Wallet bip47Wallet1 = new BIP47Wallet(47, bip44Wallet1, 1);
-        BIP47Wallet bip47Wallet2 = new BIP47Wallet(47, bip44Wallet2, 1);
+        BIP47Wallet bip47Wallet1 = TestUtils.generateBip47Wallet(params);
+        BIP47Wallet bip47Wallet2 = TestUtils.generateBip47Wallet(params);
 
         PaymentCode paymentCode1 = new PaymentCode(bip47Wallet1.getAccount(0).getPaymentCode());
         PaymentCode paymentCode2 = new PaymentCode(bip47Wallet2.getAccount(0).getPaymentCode());

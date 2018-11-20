@@ -285,10 +285,10 @@ public class PaymentCode {
   		}
   	}
 
-  	public static byte[] xorMask(byte[] dataToMask, ISecretPoint secretPoint, TransactionOutPoint outPoint) throws Exception {
+  	public static byte[] xorMask(byte[] dataToMask64bytes, ISecretPoint secretPoint, TransactionOutPoint outPoint) throws Exception {
         byte[] outpoint = outPoint.bitcoinSerialize();
         byte[] mask = getMask(secretPoint.ECDHSecretAsBytes(), outpoint);
-        return xor(dataToMask, mask);
+        return xor(dataToMask64bytes, mask);
     }
 
 }
