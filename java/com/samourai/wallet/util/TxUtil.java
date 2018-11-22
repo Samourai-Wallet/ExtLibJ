@@ -54,5 +54,42 @@ public class TxUtil {
     return null;
   }
 
+  public byte[] findInputPubkey(Transaction tx, int inputIndex, Callback<byte[]> fetchInputOutpointScriptBytes) {
+    TransactionInput transactionInput = tx.getInput(inputIndex);
+    if (transactionInput == null) {
+      return null;
+    }
+
+    // try P2WPKH / P2SH-P2WPKH: get from witness
+    byte[] inputPubkey = null;
+    try {
+      inputPubkey = tx.getWitness(inputIndex).getPush(1);
+      if (inputPubkey != null) {
+        return inputPubkey;
+      }
+    } catch(Exception e) {
+      // witness not found
+    }
+
+    // try P2PKH: get from input script
+    Script inputScript = new Script(transactionInput.getScriptBytes());
+    try {
+      inputPubkey = inputScript.getPubKey();
+      if (inputPubkey != null) {
+        return inputPubkey;
+      }
+    } catch(Exception e) {
+      // not P2PKH
+    }
+
+    // try P2PKH: get pubkey from input script
+    if (fetchInputOutpointScriptBytes != null) {
+      byte[] inputOutpointScriptBytes = fetchInputOutpointScriptBytes.execute();
+      if (inputOutpointScriptBytes != null) {
+        inputPubkey = new Script(inputOutpointScriptBytes).getPubKey();
+      }
+    }
+    return inputPubkey;
+  }
 
 }
