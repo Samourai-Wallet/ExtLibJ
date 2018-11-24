@@ -1,8 +1,6 @@
 package com.samourai.wallet.util;
 
 import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
-import com.samourai.wallet.utils.TestUtils;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
@@ -19,8 +17,8 @@ import org.junit.jupiter.api.Test;
 
 public class TxUtilTest {
     private static final TxUtil txUtil = TxUtil.getInstance();
-    private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
     private static final NetworkParameters params = TestNet3Params.get();
+    private static final CryptoTestUtil cryptoTestUtil = CryptoTestUtil.getInstance();
 
     private Transaction computeTxCoinbase(long value, Script outputScript) {
         Transaction tx = new Transaction(params);
@@ -45,7 +43,7 @@ public class TxUtilTest {
         if (transactionOutput == null) {
             // add dummy output
             transactionOutput = new TransactionOutput(params, null, inputOutPoint.getValue(),
-                TestUtils.generateSegwitAddress(params).getAddress());
+                cryptoTestUtil.generateSegwitAddress(params).getAddress());
             tx.addOutput(transactionOutput);
         }
 
@@ -79,7 +77,7 @@ public class TxUtilTest {
 
     @Test
     public void findInputPubkeyP2WPKH() throws Exception {
-        SegwitAddress inputAddress = TestUtils.generateSegwitAddress(params);
+        SegwitAddress inputAddress = cryptoTestUtil.generateSegwitAddress(params);
         ECKey inputKey = inputAddress.getECKey();
 
         // spend coinbase -> P2WPKH
@@ -93,7 +91,7 @@ public class TxUtilTest {
 
     @Test
     public void findInputPubkeyP2SHP2WPKH() throws Exception {
-        SegwitAddress inputAddress = TestUtils.generateSegwitAddress(params);
+        SegwitAddress inputAddress = cryptoTestUtil.generateSegwitAddress(params);
         ECKey inputKey = inputAddress.getECKey();
         long value = 999999;
 
