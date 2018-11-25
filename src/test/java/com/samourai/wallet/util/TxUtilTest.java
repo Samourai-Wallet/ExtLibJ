@@ -54,7 +54,7 @@ public class TxUtilTest {
         return tx;
     }
 
-    private void doFindInputPubkey(TransactionOutput linkedOutput, ECKey inputKey) {
+    private void doTestFindInputPubkeyAndVerifySignInput(TransactionOutput linkedOutput, ECKey inputKey, boolean amountSigned) throws Exception {
         // spend linkedOutput
         TransactionOutPoint inputOutPoint = linkedOutput.getOutPointFor();
         inputOutPoint.setValue(linkedOutput.getValue());
@@ -68,15 +68,40 @@ public class TxUtilTest {
             }
         };
 
-        // TEST
+        // TEST findInputPubkey
         byte[] pubkey = txUtil.findInputPubkey(tx, 0, fetchInputOutpointScriptBytes);
-
-        // VERIFY
         Assertions.assertArrayEquals(inputKey.getPubKey(), pubkey);
+
+        // TEST verifySignInput: valid signature
+        txUtil.verifySignInput(tx, 0, linkedOutput.getValue().getValue(), linkedOutput.getScriptBytes());
+
+        // verifySignInput: wrong scriptBytes
+        try {
+            Script dummyScript = ScriptBuilder.createP2WPKHOutputScript(new ECKey());
+
+            txUtil.verifySignInput(tx, 0, linkedOutput.getValue().getValue(),
+                dummyScript.getProgram()); // should raise an exception
+            Assertions.assertTrue(false);
+        } catch(Exception e) {
+            // ok
+        }
+
+        // verifySignInput: wrong amount
+        try {
+            txUtil.verifySignInput(tx, 0, linkedOutput.getValue().getValue() - 1,
+                linkedOutput.getScriptBytes()); // should raise an exception
+            if (amountSigned) {
+                Assertions.assertTrue(false, "segwit should not verify signature for invalid amount");
+            }
+        } catch(Exception e) {
+            if (!amountSigned) {
+                Assertions.assertTrue(false, "non-segwit should verify signature even for invalid amount");
+            }
+        }
     }
 
     @Test
-    public void findInputPubkeyP2WPKH() throws Exception {
+    public void testP2WPKH() throws Exception {
         SegwitAddress inputAddress = cryptoTestUtil.generateSegwitAddress(params);
         ECKey inputKey = inputAddress.getECKey();
 
@@ -86,11 +111,11 @@ public class TxUtilTest {
 
         // test
         TransactionOutput txOutput = tx.getOutput(0);
-        doFindInputPubkey(txOutput, inputKey);
+        doTestFindInputPubkeyAndVerifySignInput(txOutput, inputKey, true);
     }
 
     @Test
-    public void findInputPubkeyP2SHP2WPKH() throws Exception {
+    public void testP2SHP2WPKH() throws Exception {
         SegwitAddress inputAddress = cryptoTestUtil.generateSegwitAddress(params);
         ECKey inputKey = inputAddress.getECKey();
         long value = 999999;
@@ -102,11 +127,11 @@ public class TxUtilTest {
 
         // test
         TransactionOutput txOutput = tx.getOutput(0);
-        doFindInputPubkey(txOutput, inputKey);
+        doTestFindInputPubkeyAndVerifySignInput(txOutput, inputKey, true);
     }
 
     @Test
-    public void findInputPubkeyP2PKH() throws Exception {
+    public void testP2PKH() throws Exception {
         ECKey inputKey = new ECKey();
 
         // spend coinbase -> P2PKH
@@ -116,11 +141,11 @@ public class TxUtilTest {
 
         // test
         TransactionOutput txOutput = tx.getOutput(0);
-        doFindInputPubkey(txOutput, inputKey);
+        doTestFindInputPubkeyAndVerifySignInput(txOutput, inputKey, false);
     }
 
     @Test
-    public void findInputPubkeyP2PK() throws Exception {
+    public void testP2PK() throws Exception {
         ECKey inputKey = new ECKey();
 
         // spend coinbase -> P2PK
@@ -129,6 +154,6 @@ public class TxUtilTest {
 
         // test
         TransactionOutput txOutput = tx.getOutput(0);
-        doFindInputPubkey(txOutput, inputKey);
+        doTestFindInputPubkeyAndVerifySignInput(txOutput, inputKey, false);
     }
 }
