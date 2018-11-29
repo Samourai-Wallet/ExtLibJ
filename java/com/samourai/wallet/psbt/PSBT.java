@@ -5,6 +5,9 @@ import org.bitcoinj.params.MainNetParams;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -54,6 +57,8 @@ public class PSBT {
    private static final int STATE_INPUTS = 2;
    private static final int STATE_OUTPUTS = 3;
    private static final int STATE_END = 4;
+
+   private static final int HARDENED = 0x80000000;
 
    private int currentState = 0;
    private int inputs = 0;
@@ -535,6 +540,141 @@ public class PSBT {
        }
 
        return bb.array();
+   }
+
+   public static Pair<Long, Byte[]> readSegwitInputUTXO(byte[] utxo)    {
+       byte[] val = new byte[8];
+       byte[] scriptPubKey = new byte[utxo.length - val.length];
+
+       System.arraycopy(utxo, 0, val, 0, val.length);
+       System.arraycopy(utxo, val.length, scriptPubKey, 0, scriptPubKey.length);
+
+       ArrayUtils.reverse(val);
+       long lval = Long.parseLong(Hex.toHexString(val), 16);
+
+       int i = 0;
+       Byte[] scriptPubKeyBuf = new Byte[scriptPubKey.length];
+       for(byte b : scriptPubKey)   {
+           scriptPubKeyBuf[i++] = b;
+       }
+
+       return Pair.of(Long.valueOf(lval), scriptPubKeyBuf);
+   }
+
+   public static byte[] writeSegwitInputUTXO(long value, byte[] scriptPubKey)    {
+
+       byte[] ret = new byte[scriptPubKey.length + Long.BYTES];
+
+       // long to byte array
+       ByteBuffer xlat = ByteBuffer.allocate(Long.BYTES);
+       xlat.order(ByteOrder.LITTLE_ENDIAN);
+       xlat.putLong(0, value);
+       byte[] val = new byte[Long.BYTES];
+       xlat.get(val);
+
+       System.arraycopy(val, 0, ret, 0, Long.BYTES);
+       System.arraycopy(scriptPubKey, 0, ret, Long.BYTES, scriptPubKey.length);
+
+       return ret;
+   }
+
+   public static String readBIP32Derivation(byte[] path) {
+
+       byte[] dbuf = new byte[path.length];
+       System.arraycopy(path, 0, dbuf, 0, path.length);
+       ByteBuffer bb = ByteBuffer.wrap(dbuf);
+       byte[] buf = new byte[4];
+
+       // fingerprint
+       bb.get(buf);
+       byte[] fingerprint = new byte[4];
+       System.arraycopy(buf, 0, fingerprint, 0, fingerprint.length);
+
+       // purpose
+       bb.get(buf);
+       ArrayUtils.reverse(buf);
+       ByteBuffer pbuf = ByteBuffer.wrap(buf);
+       int purpose = pbuf.getInt();
+       if(purpose >= HARDENED)    {
+           purpose -= HARDENED;
+       }
+
+       // coin type
+       bb.get(buf);
+       ArrayUtils.reverse(buf);
+       ByteBuffer tbuf = ByteBuffer.wrap(buf);
+       int type = tbuf.getInt();
+       if(type >= HARDENED)    {
+           type -= HARDENED;
+       }
+
+       // account
+       bb.get(buf);
+       ArrayUtils.reverse(buf);
+       ByteBuffer abuf = ByteBuffer.wrap(buf);
+       int account = abuf.getInt();
+       if(account >= HARDENED)    {
+           account -= HARDENED;
+       }
+
+       // chain
+       bb.get(buf);
+       ArrayUtils.reverse(buf);
+       ByteBuffer cbuf = ByteBuffer.wrap(buf);
+       int chain = cbuf.getInt();
+
+       // index
+       bb.get(buf);
+       ArrayUtils.reverse(buf);
+       ByteBuffer ibuf = ByteBuffer.wrap(buf);
+       int index = ibuf.getInt();
+
+//       String ret = "m/" + purpose + "'/" + type + "'/" + account + "'/" + chain + "/" + index;
+       // assume hardened values
+       String ret = purpose + "/" + type + "/" + account + "/" + chain + "/" + index;
+
+       return ret;
+   }
+
+   public static byte[] writeBIP32Derivation(byte[] fingerprint, int purpose, int type, int account, int chain, int index) {
+
+       // fingerprint and integer values to BIP32 derivation buffer
+       byte[] bip32buf = new byte[24];
+
+       System.arraycopy(fingerprint, 0, bip32buf, 0, fingerprint.length);
+
+       ByteBuffer xlat = ByteBuffer.allocate(Integer.BYTES);
+       xlat.order(ByteOrder.LITTLE_ENDIAN);
+       xlat.putInt(0, purpose + HARDENED);
+       byte[] out = new byte[Integer.BYTES];
+       xlat.get(out);
+       System.arraycopy(out, 0, bip32buf, fingerprint.length, out.length);
+
+       xlat.clear();
+       xlat.order(ByteOrder.LITTLE_ENDIAN);
+       xlat.putInt(0, type + HARDENED);
+       xlat.get(out);
+       System.arraycopy(out, 0, bip32buf, fingerprint.length + out.length, out.length);
+
+       xlat.clear();
+       xlat.order(ByteOrder.LITTLE_ENDIAN);
+       xlat.putInt(0, account + HARDENED);
+       xlat.get(out);
+       System.arraycopy(out, 0, bip32buf, fingerprint.length + (out.length * 2), out.length);
+
+       xlat.clear();
+       xlat.order(ByteOrder.LITTLE_ENDIAN);
+       xlat.putInt(0, chain);
+       xlat.get(out);
+       System.arraycopy(out, 0, bip32buf, fingerprint.length + (out.length * 3), out.length);
+
+       xlat.clear();
+       xlat.order(ByteOrder.LITTLE_ENDIAN);
+       xlat.putInt(0, index);
+       xlat.get(out);
+       System.arraycopy(out, 0, bip32buf, fingerprint.length + (out.length * 4), out.length);
+
+       return bip32buf;
    }
 
    public static void Log(String s, boolean eol)  {
