@@ -2,7 +2,6 @@ package com.samourai.wallet.bip47.rpc;
 
 import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
 import com.samourai.wallet.hd.HD_Address;
-import java.lang.invoke.MethodHandles;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
