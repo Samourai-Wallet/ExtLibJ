@@ -6,6 +6,10 @@
 	<artifactId>extlibj</artifactId>
 	<version>develop-SNAPSHOT</version>
 	<name>extlibj</name>
+	<properties>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

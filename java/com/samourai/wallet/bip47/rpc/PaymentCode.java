@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PaymentCode {
+    private static final Logger log = LoggerFactory.getLogger(PaymentCode.class);
 
     private static final int PUBLIC_KEY_Y_OFFSET = 2;
     private static final int PUBLIC_KEY_X_OFFSET = 3;
@@ -237,6 +238,7 @@ public class PaymentCode {
     private static byte[] xor(byte[] a, byte[] b) {
 
         if(a.length != b.length)    {
+            log.error("Invalid length for xor: " + a.length + " vs " + b.length);
             return null;
         }
 
