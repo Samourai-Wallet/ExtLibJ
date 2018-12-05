@@ -35,6 +35,11 @@ public class TxUtil {
     tx.setWitness(inputIdx, witness);
   }
 
+  public void verifySignInput(Transaction tx, int inputIdx, long inputValue, byte[] connectedScriptBytes) throws Exception {
+    Script connectedScript = new Script(connectedScriptBytes);
+    tx.getInput(inputIdx).getScriptSig().correctlySpends(tx, inputIdx, connectedScript, Coin.valueOf(inputValue), Script.ALL_VERIFY_FLAGS);
+  }
+
   public Integer findInputIndex(Transaction tx, String txoHash, long txoIndex) {
     for (int i = 0; i < tx.getInputs().size(); i++) {
       TransactionInput input = tx.getInput(i);
@@ -46,5 +51,42 @@ public class TxUtil {
     return null;
   }
 
+  public byte[] findInputPubkey(Transaction tx, int inputIndex, Callback<byte[]> fetchInputOutpointScriptBytes) {
+    TransactionInput transactionInput = tx.getInput(inputIndex);
+    if (transactionInput == null) {
+      return null;
+    }
+
+    // try P2WPKH / P2SH-P2WPKH: get from witness
+    byte[] inputPubkey = null;
+    try {
+      inputPubkey = tx.getWitness(inputIndex).getPush(1);
+      if (inputPubkey != null) {
+        return inputPubkey;
+      }
+    } catch(Exception e) {
+      // witness not found
+    }
+
+    // try P2PKH: get from input script
+    Script inputScript = new Script(transactionInput.getScriptBytes());
+    try {
+      inputPubkey = inputScript.getPubKey();
+      if (inputPubkey != null) {
+        return inputPubkey;
+      }
+    } catch(Exception e) {
+      // not P2PKH
+    }
+
+    // try P2PKH: get pubkey from input script
+    if (fetchInputOutpointScriptBytes != null) {
+      byte[] inputOutpointScriptBytes = fetchInputOutpointScriptBytes.execute();
+      if (inputOutpointScriptBytes != null) {
+        inputPubkey = new Script(inputOutpointScriptBytes).getPubKey();
+      }
+    }
+    return inputPubkey;
+  }
 
 }

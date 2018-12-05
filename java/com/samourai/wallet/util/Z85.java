@@ -2,6 +2,8 @@ package com.samourai.wallet.util;
 
 public class Z85 {
 
+    public static final String Z85_REGEX = "^[0-9A-Za-z\\.\\-:\\+\\=\\^!\\/\\*\\?&<>\\(\\)\\[\\]\\{\\}\\@%\\$\\#]+$";
+
     private static Z85 instance = null;
 
     private static final int[] decoders = new int[]{
@@ -88,9 +90,7 @@ public class Z85 {
 
     public boolean isZ85(String s) {
 
-        String regexZ85 = "^[0-9A-Za-z\\.\\-:\\+\\=\\^!\\/\\*\\?&<>\\(\\)\\[\\]\\{\\}\\@%\\$\\#]+$";
-
-        if(s.matches(regexZ85))    {
+        if(s.matches(Z85_REGEX))    {
             return true;
         }
         else    {

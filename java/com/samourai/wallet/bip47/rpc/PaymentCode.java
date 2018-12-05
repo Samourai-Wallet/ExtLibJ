@@ -1,25 +1,27 @@
 package com.samourai.wallet.bip47.rpc;
 
+import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
 import com.samourai.wallet.hd.HD_Address;
-
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.lang3.tuple.Pair;
-
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.ByteBuffer;
-import java.nio.BufferUnderflowException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PaymentCode {
+    private static final Logger log = LoggerFactory.getLogger(PaymentCode.class);
 
     private static final int PUBLIC_KEY_Y_OFFSET = 2;
     private static final int PUBLIC_KEY_X_OFFSET = 3;
@@ -236,6 +238,7 @@ public class PaymentCode {
     private static byte[] xor(byte[] a, byte[] b) {
 
         if(a.length != b.length)    {
+            log.error("Invalid length for xor: " + a.length + " vs " + b.length);
             return null;
         }
 
@@ -285,5 +288,11 @@ public class PaymentCode {
   			return false;
   		}
   	}
+
+  	public static byte[] xorMask(byte[] dataToMask64bytes, ISecretPoint secretPoint, TransactionOutPoint outPoint) throws Exception {
+        byte[] outpoint = outPoint.bitcoinSerialize();
+        byte[] mask = getMask(secretPoint.ECDHSecretAsBytes(), outpoint);
+        return xor(dataToMask64bytes, mask);
+    }
 
 }

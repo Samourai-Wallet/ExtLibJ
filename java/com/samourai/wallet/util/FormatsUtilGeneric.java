@@ -3,6 +3,7 @@ package com.samourai.wallet.util;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.segwit.bech32.Bech32;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
+import com.samourai.wallet.psbt.PSBT;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
@@ -12,6 +13,7 @@ import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Base64;
 
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
@@ -19,8 +21,11 @@ import java.util.regex.Pattern;
 
 public class FormatsUtilGeneric {
 
-	private String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?$)";
-	private String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$";
+	public static final String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?$)";
+	public static final String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$";
+
+	public static final String HEX_REGEX = "^[0-9A-Fa-f]+$";
+	public static final String BASE64_REGEX = "^[0-9A-Za-z\\\\+=/]+$";
 
 	public static final int MAGIC_XPUB = 0x0488B21E;
 	public static final int MAGIC_TPUB = 0x043587CF;
@@ -334,13 +339,16 @@ public class FormatsUtilGeneric {
 
 	public DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
 
+		if(!isValidXpub(xpubstr))	{
+				return null;
+		}
+
 		byte[] xpubBytes = Base58.decodeChecked(xpubstr);
 
 		ByteBuffer bb = ByteBuffer.wrap(xpubBytes);
-		int version = bb.getInt();
-		if(version != FormatsUtilGeneric.MAGIC_XPUB && version != FormatsUtilGeneric.MAGIC_TPUB && version != FormatsUtilGeneric.MAGIC_YPUB && version != FormatsUtilGeneric.MAGIC_UPUB && version != FormatsUtilGeneric.MAGIC_ZPUB && version != FormatsUtilGeneric.MAGIC_VPUB)   {
-			throw new AddressFormatException("invalid xpub version");
-		}
+
+		// magic value
+		bb.getInt();
 
 		byte[] chain = new byte[32];
 		byte[] pub = new byte[33];
@@ -354,6 +362,59 @@ public class FormatsUtilGeneric {
 		bb.get(pub);
 
 		return HDKeyDerivation.createMasterPubKeyFromBytes(pub, chain);
+	}
+
+	public byte[] getFingerprintFromXPUB(String xpubstr) throws AddressFormatException {
+
+		if(!isValidXpub(xpubstr))	{
+				return null;
+		}
+
+		byte[] xpubBytes = Base58.decodeChecked(xpubstr);
+		// parent fingerprint:
+		byte[] fingerprint = new byte[4];
+		System.arraycopy(xpubBytes, 5, fingerprint, 0, fingerprint.length);
+
+		return fingerprint;
+	}
+
+	public boolean isHex(String s)   {
+
+			if(s.matches(HEX_REGEX))    {
+					return true;
+			}
+			else    {
+					return false;
+			}
+
+	}
+
+	public boolean isBase64(String s)   {
+
+			if(s.matches(BASE64_REGEX))    {
+					return true;
+			}
+			else    {
+					return false;
+			}
+
+	}
+
+	public boolean isPSBT(String s)   {
+
+			if(isHex(s) && s.startsWith(PSBT.PSBT_MAGIC))    {
+					return true;
+			}
+			else if(isBase64(s) && Hex.toHexString(Base64.decode(s)).startsWith(PSBT.PSBT_MAGIC))    {
+					return true;
+			}
+			else if(Z85.getInstance().isZ85(s) && Hex.toHexString(Z85.getInstance().decode(s)).startsWith(PSBT.PSBT_MAGIC))    {
+					return true;
+			}
+			else    {
+					return false;
+			}
+
 	}
 
 }
