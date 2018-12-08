@@ -54,7 +54,7 @@ public class TxUtilTest {
         return tx;
     }
 
-    private void doTestFindInputPubkeyAndVerifySignInput(TransactionOutput linkedOutput, ECKey inputKey, boolean amountSigned) throws Exception {
+    private void doTestFindInputPubkeyAndVerifySignInput(final TransactionOutput linkedOutput, ECKey inputKey, boolean amountSigned) throws Exception {
         // spend linkedOutput
         TransactionOutPoint inputOutPoint = linkedOutput.getOutPointFor();
         inputOutPoint.setValue(linkedOutput.getValue());
