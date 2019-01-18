@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 
 public class FormatsUtilGeneric {
 
-	public static final String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?$)";
-	public static final String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$";
+	public static final String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?)";
+	public static final String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?";
 
 	public static final String HEX_REGEX = "^[0-9A-Fa-f]+$";
 	public static final String BASE64_REGEX = "^[0-9A-Za-z\\\\+=/]+$";
