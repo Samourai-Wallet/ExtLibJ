@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 
 public class FormatsUtilGeneric {
 
-	public static final String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?$)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?)";
-	public static final String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?";
+	public static final String URI_BECH32 = "(^bitcoin:(tb|bc)1([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?(?s).*)|(^bitcoin:(TB|BC)1([QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]+)(\\?amount\\=([0-9.]+))?(?s).*)";
+	public static final String URI_BECH32_LOWER = "^bitcoin:((tb|bc)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\?amount\\=([0-9.]+))?(?s).*";
 
 	public static final String HEX_REGEX = "^[0-9A-Fa-f]+$";
 	public static final String BASE64_REGEX = "^[0-9A-Za-z\\\\+=/]+$";
@@ -156,14 +156,26 @@ public class FormatsUtilGeneric {
 			if(s.toLowerCase().matches(URI_BECH32_LOWER))	{
 				Pattern pattern = Pattern.compile(URI_BECH32_LOWER);
 				Matcher matcher = pattern.matcher(s.toLowerCase());
-				if(matcher.find() && matcher.group(4) != null)    {
-					String amt = matcher.group(4);
-					try	{
-						return Long.toString(Math.round(Double.valueOf(amt) * 1e8));
+				if(matcher.find() && matcher.group(3) != null)    {
+
+					String amt = null;
+					int idx = matcher.group(3).indexOf("=");
+					if(idx != -1 && idx < matcher.group(3).length())    {
+							amt = matcher.group(3).substring(idx + 1);
 					}
-					catch(NumberFormatException nfe)	{
+
+					if(amt != null)	{
+						try	{
+							return Long.toString(Math.round(Double.valueOf(amt) * 1e8));
+						}
+						catch(NumberFormatException nfe)	{
+							ret = "0.0000";
+						}
+					}
+					else	{
 						ret = "0.0000";
 					}
+
 				}
 			}
 			else	{
