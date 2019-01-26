@@ -39,12 +39,25 @@ public class HD_WalletFactoryGeneric {
       byte[] seed = Hex.decodeHex(data.toCharArray());
       hdw = new HD_Wallet(44, mc, params, seed, passphrase, nbAccounts);
     } else {
-      data = data.toLowerCase().replaceAll("[^a-z]+", " "); // only use for BIP39 English
-      List<String> words = Arrays.asList(data.trim().split("\\s+"));
-      byte[] seed = mc.toEntropy(words);
+      byte[] seed = computeSeedFromWords(data);
       hdw = new HD_Wallet(44, mc, params, seed, passphrase, nbAccounts);
     }
     return hdw;
+  }
+
+  public byte[] computeSeedFromWords(String data) throws AddressFormatException,
+      MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException,
+      MnemonicException.MnemonicChecksumException {
+    data = data.toLowerCase().replaceAll("[^a-z]+", " "); // only use for BIP39 English
+    List<String> words = Arrays.asList(data.trim().split("\\s+"));
+    return computeSeedFromWords(words);
+  }
+
+  public byte[] computeSeedFromWords(List<String> words) throws AddressFormatException,
+      MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException,
+      MnemonicException.MnemonicChecksumException {
+    byte[] seed = mc.toEntropy(words);
+    return seed;
   }
 
   public BIP47Wallet getBIP47(String seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
@@ -52,20 +65,16 @@ public class HD_WalletFactoryGeneric {
     return hdw47;
   }
 
-  public HD_Wallet getHD(int purpose, String seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
-    return getHD(purpose, org.bouncycastle.util.encoders.Hex.decode(seed), passphrase, params);
-  }
-
   public HD_Wallet getHD(int purpose, byte[] seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
     HD_Wallet hdw = new HD_Wallet(purpose, mc, params, seed, passphrase, 1);
     return hdw;
   }
 
-  public HD_Wallet getBIP49(String seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
+  public HD_Wallet getBIP49(byte[] seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
     return getHD(49, seed, passphrase, params);
   }
 
-  public HD_Wallet getBIP84(String seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
+  public HD_Wallet getBIP84(byte[] seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
     return getHD(84, seed, passphrase, params);
   }
 }
