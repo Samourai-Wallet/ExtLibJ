@@ -92,6 +92,6 @@
 	</repositories>
   <scm>
     <connection>scm:git:https://github.com/Samourai-Wallet/ExtLibJ.git</connection>
-    <tag>0.0.1</tag>
+    <tag>HEAD</tag>
   </scm>
 </project>
