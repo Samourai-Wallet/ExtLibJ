@@ -8,6 +8,7 @@
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
+		<project.scm.id>samourai</project.scm.id>
 	</properties>
 	<dependencies>
 		<dependency>
