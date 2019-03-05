@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.samouraiwallet</groupId>
-	<artifactId>ext-lib-j</artifactId>
-	<version>0.0.1-whirlpool-SNAPSHOT</version>
-	<name>ext-lib-j</name>
+	<groupId>com.github.Samourai-Wallet</groupId>
+	<artifactId>extlibj</artifactId>
+	<version>develop-SNAPSHOT</version>
+	<name>extlibj</name>
+	<properties>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+		<project.scm.id>samourai</project.scm.id>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.7</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -43,13 +52,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<executions>
@@ -72,6 +74,15 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+					<developmentVersion>develop-SNAPSHOT</developmentVersion>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<repositories>
@@ -80,4 +91,8 @@
 			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
+  <scm>
+    <connection>scm:git:https://github.com/Samourai-Wallet/ExtLibJ.git</connection>
+    <tag>HEAD</tag>
+  </scm>
 </project>

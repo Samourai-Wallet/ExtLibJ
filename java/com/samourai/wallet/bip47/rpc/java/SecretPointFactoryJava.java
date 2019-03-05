@@ -1,28 +1,27 @@
-package com.samourai.wallet.bip47.rpc.impl;
+package com.samourai.wallet.bip47.rpc.java;
 
 import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
 import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPointFactory;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
-public class SecretPointFactory implements ISecretPointFactory {
+public class SecretPointFactoryJava implements ISecretPointFactory {
 
-    private static SecretPointFactory instance = null;
-    public static SecretPointFactory getInstance() {
+    private static SecretPointFactoryJava instance = null;
+    public static SecretPointFactoryJava getInstance() {
         if (instance == null) {
-            instance = new SecretPointFactory();
+            instance = new SecretPointFactoryJava();
         }
         return instance;
     }
 
-    private SecretPointFactory() {}
+    private SecretPointFactoryJava() {}
 
     @Override
     public ISecretPoint newSecretPoint(byte[] dataPrv, byte[] dataPub) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException {
-        return new SecretPoint(dataPrv, dataPub);
+        return new SecretPointJava(dataPrv, dataPub);
     }
 
 }

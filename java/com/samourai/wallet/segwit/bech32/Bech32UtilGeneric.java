@@ -1,5 +1,7 @@
 package com.samourai.wallet.segwit.bech32;
 
+import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.segwit.SegwitAddress;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -67,23 +69,9 @@ public class Bech32UtilGeneric {
         return Bech32Segwit.encode(hrp, (byte)0x00, scriptBytes);
     }
 
-    public TransactionOutput getTransactionOutput(String address, long value, NetworkParameters params) throws Exception    {
-
-        TransactionOutput output = null;
-
-        if(address.toLowerCase().startsWith("tb") || address.toLowerCase().startsWith("bc"))   {
-
-            try {
-                byte[] scriptPubKey = computeScriptPubKey(address, params);
-                output = new TransactionOutput(params, null, Coin.valueOf(value), scriptPubKey);
-            }
-            catch(Exception e) {
-                return null;
-            }
-
-        }
-
-        return output;
+    public TransactionOutput getTransactionOutput(String address, long value, NetworkParameters params) throws Exception {
+        byte[] scriptPubKey = computeScriptPubKey(address, params);
+        return new TransactionOutput(params, null, Coin.valueOf(value), scriptPubKey);
     }
 
     public byte[] computeScriptPubKey(String address, NetworkParameters params) throws Exception {
@@ -93,6 +81,14 @@ public class Bech32UtilGeneric {
 
         // get scriptPubkey
         return Bech32Segwit.getScriptPubkey(pair.getLeft(), pair.getRight());
+    }
+
+    public String toBech32(HD_Address hdAddress, NetworkParameters params) {
+        return toBech32(hdAddress.getPubKey(), params);
+    }
+
+    public String toBech32(byte[] pubkey, NetworkParameters params) {
+        return new SegwitAddress(pubkey, params).getBech32AsString();
     }
 
 }
