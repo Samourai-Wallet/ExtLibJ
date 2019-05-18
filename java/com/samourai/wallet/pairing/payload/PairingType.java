@@ -1,5 +1,6 @@
 package com.samourai.wallet.pairing.payload;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
 
 public enum PairingType {
@@ -17,6 +18,11 @@ public enum PairingType {
               return Optional.of(item);
           }
       }
-    return Optional.absent();
+      return Optional.absent();
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
     }
   }
