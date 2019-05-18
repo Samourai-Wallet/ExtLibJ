@@ -1,4 +1,4 @@
-package com.samourai.wallet.pairing.payload;
+package com.samourai.wallet.api.pairing;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

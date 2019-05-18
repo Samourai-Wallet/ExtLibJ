@@ -1,4 +1,4 @@
-package com.samourai.wallet.pairing.payload;
+package com.samourai.wallet.api.pairing;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
