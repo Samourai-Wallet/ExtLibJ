@@ -5,7 +5,7 @@ import com.samourai.wallet.api.backend.beans.HttpException;
 import java.util.Map;
 
 public interface IBackendClient {
-  <T> T parseJson(String url, Class<T> entityClass) throws HttpException;
+  <T> T getJson(String url, Class<T> responseType) throws HttpException;
 
-  void postUrlEncoded(String url, Map<String, String> body) throws HttpException;
+  <T> T postUrlEncoded(String url, Class<T> responseType, Map<String, String> body) throws HttpException;
 }
