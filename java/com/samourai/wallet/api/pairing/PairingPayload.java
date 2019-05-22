@@ -9,8 +9,12 @@ public class PairingPayload {
 
   private CliPairingValue pairing;
 
-  public PairingPayload(PairingType type, PairingVersion version, PairingNetwork network, String mnemonic) {
-    this.pairing = new CliPairingValue(type, version, network, mnemonic);
+  public PairingPayload() {
+      this.pairing = new CliPairingValue();
+  }
+
+  public PairingPayload(PairingType type, PairingVersion version, PairingNetwork network, String mnemonic, Boolean passphrase) {
+    this.pairing = new CliPairingValue(type, version, network, mnemonic, passphrase);
   }
 
   protected void validate() throws Exception {
@@ -33,12 +37,18 @@ public class PairingPayload {
     private PairingVersion version;
     private PairingNetwork network;
     private String mnemonic;
+    private Boolean passphrase; // NULL for V1
 
-    public CliPairingValue(PairingType type, PairingVersion version, PairingNetwork network, String mnemonic) {
+      public CliPairingValue() {
+
+      }
+
+    public CliPairingValue(PairingType type, PairingVersion version, PairingNetwork network, String mnemonic, Boolean passphrase) {
       this.type = type;
       this.version = version;
       this.network = network;
       this.mnemonic = mnemonic;
+      this.passphrase = passphrase;
     }
 
     protected void validate() throws Exception {
@@ -89,6 +99,14 @@ public class PairingPayload {
 
     public void setMnemonic(String mnemonic) {
       this.mnemonic = mnemonic;
+    }
+
+    public Boolean getPassphrase() {
+      return passphrase;
+    }
+
+    public void setPassphrase(Boolean passphrase) {
+      this.passphrase = passphrase;
     }
   }
 

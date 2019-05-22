@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
 
 public enum PairingVersion {
-    V1_0_0("1.0.0");
+    V1_0_0("1.0.0"),
+    V2_0_0("2.0.0");
 
     private String value;
 
