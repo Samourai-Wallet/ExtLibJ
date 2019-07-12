@@ -20,10 +20,6 @@ public class BackendApi {
   private IBackendClient httpClient;
   private String urlBackend;
 
-  public BackendApi(IBackendClient httpClient, BackendServer backendServer) {
-    this(httpClient, backendServer.getBackendUrl());
-  }
-
   public BackendApi(IBackendClient httpClient, String urlBackend) {
     this.httpClient = httpClient;
     this.urlBackend = urlBackend;
