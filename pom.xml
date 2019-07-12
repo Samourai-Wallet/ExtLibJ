@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.Samourai-Wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>0.0.5</version>
+	<version>develop-SNAPSHOT</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
@@ -88,6 +88,6 @@
 	</repositories>
   <scm>
     <connection>scm:git:https://github.com/Samourai-Wallet/ExtLibJ.git</connection>
-    <tag>0.0.5</tag>
+    <tag>HEAD</tag>
   </scm>
 </project>
