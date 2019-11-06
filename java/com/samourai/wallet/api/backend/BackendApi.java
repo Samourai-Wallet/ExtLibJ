@@ -4,31 +4,37 @@ import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.api.backend.beans.MultiAddrResponse;
 import com.samourai.wallet.api.backend.beans.RefreshTokenResponse;
 import com.samourai.wallet.api.backend.beans.UnspentResponse;
+import com.samourai.wallet.util.oauth.OAuthApi;
+import com.samourai.wallet.util.oauth.OAuthManager;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class BackendApi {
+public class BackendApi implements OAuthApi {
   private Logger log = LoggerFactory.getLogger(BackendApi.class);
 
   private static final String URL_UNSPENT = "/unspent?active=";
   private static final String URL_MULTIADDR = "/multiaddr?active=";
   private static final String URL_INIT_BIP84 = "/xpub";
-  private static final String URL_FEES = "/fees";
+  private static final String URL_MINER_FEES = "/fees";
   private static final String URL_PUSHTX = "/pushtx/";
   private static final String URL_GET_AUTH_LOGIN = "/auth/login";
   private static final String URL_GET_AUTH_REFRESH = "/auth/refresh";
 
   private IBackendClient httpClient;
   private String urlBackend;
-  private String apiKey;
+  private OAuthManager oAuthManager;
 
-  public BackendApi(IBackendClient httpClient, String urlBackend, String apiKey) {
+  public BackendApi(IBackendClient httpClient, String urlBackend, OAuthManager oAuthManager) {
     this.httpClient = httpClient;
     this.urlBackend = urlBackend;
-    this.apiKey = apiKey; // may be null
+    this.oAuthManager = oAuthManager; // may be null
+    if (log.isDebugEnabled()) {
+      String oAuthStr = oAuthManager != null ? "yes" : "no";
+      log.debug("urlBackend=" + urlBackend + ", oAuth=" + oAuthStr);
+    }
   }
 
   public List<UnspentResponse.UnspentOutput> fetchUtxos(String zpub) throws Exception {
@@ -92,14 +98,14 @@ public class BackendApi {
     httpClient.postUrlEncoded(url, Void.class, headers, postBody);
   }
 
-  public SamouraiFee fetchFees() throws Exception {
-    String url = computeAuthUrl(urlBackend + URL_FEES);
+  public MinerFee fetchMinerFee() throws Exception {
+    String url = computeAuthUrl(urlBackend + URL_MINER_FEES);
     Map<String,String> headers = computeHeaders();
     Map<String, Integer> feeResponse = httpClient.getJson(url, Map.class, headers);
     if (feeResponse == null) {
-      throw new Exception("Invalid fee response from server");
+      throw new Exception("Invalid miner fee response from server");
     }
-    return new SamouraiFee(feeResponse);
+    return new MinerFee(feeResponse);
   }
 
   public void pushTx(String txHex) throws Exception {
@@ -130,40 +136,22 @@ public class BackendApi {
     }
   }
 
-  protected RefreshTokenResponse.Authorization tokenAuthenticate() throws Exception {
-    String url = getUrlBackend() + URL_GET_AUTH_LOGIN;
-    if (log.isDebugEnabled()) {
-      log.debug("tokenAuthenticate");
+  public boolean testConnectivity() {
+    try {
+      fetchMinerFee();
+      return true;
+    } catch (Exception e) {
+      log.error("", e);
+      return false;
     }
-    Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("apikey", getApiKey());
-    RefreshTokenResponse response =
-            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null|| StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations;
-  }
-
-  protected String tokenRefresh(String refreshToken) throws Exception {
-    String url = getUrlBackend() + URL_GET_AUTH_REFRESH;
-    if (log.isDebugEnabled()) {
-      log.debug("tokenRefresh");
-    }
-    Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("rt", refreshToken);
-    RefreshTokenResponse response =
-            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null || StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations.access_token;
   }
 
   protected Map<String,String> computeHeaders() throws Exception {
     Map<String,String> headers = new HashMap<String, String>();
+    if (oAuthManager != null) {
+      // add auth token
+      headers.put("Authorization<", "Bearer " + oAuthManager.computeAccessToken(this));
+    }
     return headers;
   }
 
@@ -176,11 +164,43 @@ public class BackendApi {
     return httpClient;
   }
 
-  protected String getApiKey() {
-    return apiKey;
-  }
-
   public String getUrlBackend() {
     return urlBackend;
+  }
+
+  // OAuthAPI
+
+  @Override
+  public RefreshTokenResponse.Authorization oAuthAuthenticate(String apiKey) throws Exception {
+    String url = getUrlBackend() + URL_GET_AUTH_LOGIN;
+    if (log.isDebugEnabled()) {
+      log.debug("tokenAuthenticate");
+    }
+    Map<String, String> postBody = new HashMap<String, String>();
+    postBody.put("apikey", apiKey);
+    RefreshTokenResponse response =
+            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
+
+    if (response.authorizations == null|| StringUtils.isEmpty(response.authorizations.access_token)) {
+      throw new Exception("Authorization refused. Invalid apiKey?");
+    }
+    return response.authorizations;
+  }
+
+  @Override
+  public String oAuthRefresh(String refreshTokenStr) throws Exception {
+    String url = getUrlBackend() + URL_GET_AUTH_REFRESH;
+    if (log.isDebugEnabled()) {
+      log.debug("tokenRefresh");
+    }
+    Map<String, String> postBody = new HashMap<String, String>();
+    postBody.put("rt", refreshTokenStr);
+    RefreshTokenResponse response =
+            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
+
+    if (response.authorizations == null || StringUtils.isEmpty(response.authorizations.access_token)) {
+      throw new Exception("Authorization refused. Invalid apiKey?");
+    }
+    return response.authorizations.access_token;
   }
 }

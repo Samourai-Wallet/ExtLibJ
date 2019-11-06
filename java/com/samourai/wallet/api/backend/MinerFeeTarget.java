@@ -1,6 +1,6 @@
 package com.samourai.wallet.api.backend;
 
-public enum SamouraiFeeTarget {
+public enum MinerFeeTarget {
   BLOCKS_2("2"),
   BLOCKS_4("4"),
   BLOCKS_6("6"),
@@ -9,7 +9,7 @@ public enum SamouraiFeeTarget {
 
   private String value;
 
-  SamouraiFeeTarget(String value) {
+  MinerFeeTarget(String value) {
     this.value = value;
   }
 
