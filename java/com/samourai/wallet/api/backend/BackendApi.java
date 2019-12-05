@@ -150,7 +150,7 @@ public class BackendApi implements OAuthApi {
     Map<String,String> headers = new HashMap<String, String>();
     if (oAuthManager != null) {
       // add auth token
-      headers.put("Authorization<", "Bearer " + oAuthManager.computeAccessToken(this));
+      headers.put("Authorization", "Bearer " + oAuthManager.computeAccessToken(this));
     }
     return headers;
   }
