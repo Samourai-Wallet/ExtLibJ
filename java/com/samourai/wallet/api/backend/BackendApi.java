@@ -6,6 +6,7 @@ import com.samourai.wallet.api.backend.beans.RefreshTokenResponse;
 import com.samourai.wallet.api.backend.beans.UnspentResponse;
 import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
+import java8.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +26,14 @@ public class BackendApi implements OAuthApi {
 
   private IBackendClient httpClient;
   private String urlBackend;
-  private OAuthManager oAuthManager;
+  private Optional<OAuthManager> oAuthManager;
 
-  public BackendApi(IBackendClient httpClient, String urlBackend, String apiKey) {
+  public BackendApi(IBackendClient httpClient, String urlBackend, Optional<OAuthManager> oAuthManager) {
     this.httpClient = httpClient;
     this.urlBackend = urlBackend;
-    this.oAuthManager = (apiKey != null ? new OAuthManager(apiKey) : null);
+    this.oAuthManager = oAuthManager;
     if (log.isDebugEnabled()) {
-      String oAuthStr = oAuthManager != null ? "yes" : "no";
+      String oAuthStr = oAuthManager.isPresent() ? "yes" : "no";
       log.debug("urlBackend=" + urlBackend + ", oAuth=" + oAuthStr);
     }
   }
@@ -148,9 +149,9 @@ public class BackendApi implements OAuthApi {
 
   protected Map<String,String> computeHeaders() throws Exception {
     Map<String,String> headers = new HashMap<String, String>();
-    if (oAuthManager != null) {
+    if (oAuthManager.isPresent()) {
       // add auth token
-      headers.put("Authorization", "Bearer " + oAuthManager.computeAccessToken(this));
+      headers.put("Authorization", "Bearer " + oAuthManager.get().getOAuthAccessToken(this));
     }
     return headers;
   }
