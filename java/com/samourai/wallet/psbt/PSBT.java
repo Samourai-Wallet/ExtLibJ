@@ -27,26 +27,26 @@ public class PSBT {
     public static final int ENCODING_BASE64 = 1;
     public static final int ENCODING_Z85 = 2;
 
-    public static final byte PSBT_GLOBAL_UNSIGNED_TX = 0x00;
-    public static final byte PSBT_GLOBAL_XPUB = 0x01;
+    public static final byte PSBT_GLOBAL_UNSIGNED_TX = (byte)0x00;
+    public static final byte PSBT_GLOBAL_XPUB = (byte)0x01;
     public static final byte PSBT_GLOBAL_VERSION = (byte)0xFB;
     public static final byte PSBT_GLOBAL_PROPRIETARY = (byte)0xFC;
 
-    public static final byte PSBT_IN_NON_WITNESS_UTXO = 0x00;
-    public static final byte PSBT_IN_WITNESS_UTXO = 0x01;
-    public static final byte PSBT_IN_PARTIAL_SIG = 0x02;
-    public static final byte PSBT_IN_SIGHASH_TYPE = 0x03;
-    public static final byte PSBT_IN_REDEEM_SCRIPT = 0x04;
-    public static final byte PSBT_IN_WITNESS_SCRIPT = 0x05;
-    public static final byte PSBT_IN_BIP32_DERIVATION = 0x06;
-    public static final byte PSBT_IN_FINAL_SCRIPTSIG = 0x07;
-    public static final byte PSBT_IN_FINAL_SCRIPTWITNESS = 0x08;
-    public static final byte PSBT_IN_POR_COMMITMENT = 0x09;
+    public static final byte PSBT_IN_NON_WITNESS_UTXO = (byte)0x00;
+    public static final byte PSBT_IN_WITNESS_UTXO = (byte)0x01;
+    public static final byte PSBT_IN_PARTIAL_SIG = (byte)0x02;
+    public static final byte PSBT_IN_SIGHASH_TYPE = (byte)0x03;
+    public static final byte PSBT_IN_REDEEM_SCRIPT = (byte)0x04;
+    public static final byte PSBT_IN_WITNESS_SCRIPT = (byte)0x05;
+    public static final byte PSBT_IN_BIP32_DERIVATION = (byte)0x06;
+    public static final byte PSBT_IN_FINAL_SCRIPTSIG = (byte)0x07;
+    public static final byte PSBT_IN_FINAL_SCRIPTWITNESS = (byte)0x08;
+    public static final byte PSBT_IN_POR_COMMITMENT = (byte)0x09;
     public static final byte PSBT_IN_PROPRIETARY = (byte)0xFC;
 
-    public static final byte PSBT_OUT_REDEEM_SCRIPT = 0x00;
-    public static final byte PSBT_OUT_WITNESS_SCRIPT = 0x01;
-    public static final byte PSBT_OUT_BIP32_DERIVATION = 0x02;
+    public static final byte PSBT_OUT_REDEEM_SCRIPT = (byte)0x00;
+    public static final byte PSBT_OUT_WITNESS_SCRIPT = (byte)0x01;
+    public static final byte PSBT_OUT_BIP32_DERIVATION = (byte)0x02;
     public static final byte PSBT_OUT_PROPRIETARY = (byte)0xFC;
 
     public static final String PSBT_MAGIC = "70736274";
@@ -415,15 +415,29 @@ public class PSBT {
         psbtOutputs.add(populateEntry(type, keydata, data));
     }
 
+    public void addInputSeparator()  {
+        psbtInputs.add(new PSBTEntry());
+    }
+
+    public void addOutputSeparator()    {
+        psbtOutputs.add(new PSBTEntry());
+    }
+
     private PSBTEntry populateEntry(byte type, byte[] keydata, byte[] data) throws Exception {
 
-        PSBTEntry entry = new PSBTEntry();
-        entry.setKeyType(new byte[] { type });
-        entry.setKey(new byte[] { type });
-        if(keydata != null)    {
-            entry.setKeyData(keydata);
-        }
-        entry.setData(data);
+      PSBTEntry entry = new PSBTEntry();
+      entry.setKeyType(new byte[] { type });
+      if(keydata != null)    {
+          byte[] kd = new byte[1 + keydata.length];
+          kd[0] = type;
+          System.arraycopy(keydata, 0, kd, 1, keydata.length);
+          entry.setKey(kd);
+          entry.setKeyData(keydata);
+      }
+      else    {
+          entry.setKey(new byte[] { type });
+      }
+      entry.setData(data);
 
         return entry;
     }

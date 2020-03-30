@@ -1,5 +1,7 @@
 package com.samourai.wallet.psbt;
 
+import org.bouncycastle.util.encoders.Hex;
+
 public class PSBTEntry    {
 
     public PSBTEntry() { ; }
@@ -50,4 +52,35 @@ public class PSBTEntry    {
     public void setState(int state) {
         this.state = state;
     }
+
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("key:");
+        if(key == null) {
+            sb.append("null key");
+            return sb.toString();
+        }
+        else {
+            sb.append(Hex.toHexString(key));
+        }
+        sb.append(",");
+        sb.append("keyType:");
+        sb.append(Hex.toHexString(keyType));
+        sb.append(",");
+        sb.append("keyData:");
+        if(keyData != null) {
+            sb.append(Hex.toHexString(keyData));
+        }
+        else {
+            sb.append("null");
+        }
+        sb.append(",");
+        sb.append("data:");
+        sb.append(Hex.toHexString(data));
+
+        return sb.toString();
+    }
+
 }
