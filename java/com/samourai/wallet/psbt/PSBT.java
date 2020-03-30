@@ -173,13 +173,6 @@ public class PSBT {
 
     }
 
-    public PSBT()   {
-        psbtInputs = new ArrayList<PSBTEntry>();
-        psbtOutputs = new ArrayList<PSBTEntry>();
-        this.transaction = new Transaction(MainNetParams.get());
-        sbLog = new StringBuilder();
-    }
-
     public PSBT(Transaction transaction)   {
         psbtInputs = new ArrayList<PSBTEntry>();
         psbtOutputs = new ArrayList<PSBTEntry>();
@@ -187,19 +180,8 @@ public class PSBT {
         sbLog = new StringBuilder();
     }
 
-    public PSBT(NetworkParameters params)   {
-        psbtInputs = new ArrayList<PSBTEntry>();
-        psbtOutputs = new ArrayList<PSBTEntry>();
-        transaction = new Transaction(params);
-        sbLog = new StringBuilder();
-    }
-
-    public PSBT(NetworkParameters params, int version)   {
-        psbtInputs = new ArrayList<PSBTEntry>();
-        psbtOutputs = new ArrayList<PSBTEntry>();
-        transaction = new Transaction(params);
-        transaction.setVersion(version);
-        sbLog = new StringBuilder();
+    private PSBT()   {
+        ;
     }
 
     //
