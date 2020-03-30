@@ -23,6 +23,7 @@ import java.util.List;
 public class PSBTTest {
 
     private static String strPSBT = "70736274 FF01009A 02000000 0232A139 2B4777AA AE109030 4246D564 E99D68EB E3D35F12 A77FBAE7 281D0A93 E1010000 0000FDFF FFFF67D3 8F936062 1FF49887 38FEB31D DEE2E618 2CFCDD4A B68721F4 D49CADBA 82EE0100 000000FD FFFFFF02 C222480A 00000000 16001498 79AF465E D7CF0054 276217D2 E9130767 F6369100 4B26A039 00000016 00149032 58C94687 540B468C 3763F348 941FAB40 7AF9A777 19000001 011FC049 6E0A0000 00001600 1407AF7C FEC74560 0DA9BFFE BC6A1DB2 9D42EA9A CE220602 F6017FE8 A221D141 CE5FE7FB D3636F59 45434246 B5A02CC4 CFC4B58B B3B2C3FC 180D8C85 AB540000 80010000 80000000 80000000 00080000 00000101 1FD32400 A0390000 00160014 C583F828 737798EE 6AB85B1D 919339BE BEC95CD0 22060215 5F483277 2ADB0D18 CFFBE94A 8A97BCB1 D952C68A B1992E94 808DA7AE 1A8CB018 0D8C85AB 54000080 01000080 00000080 01000000 04000000 00220202 F45169DB 34C54A85 F36BB454 BF0782D6 D0B0E8EC 6B8E2C4B 973AB6D5 8553A202 180D8C85 AB540000 80010000 80000000 80010000 00050000 000000";
+    private static String strTx = "020000000232a1392b4777aaae1090304246d564e99d68ebe3d35f12a77fbae7281d0a93e10100000000fdffffff67d38f9360621ff4988738feb31ddee2e6182cfcdd4ab68721f4d49cadba82ee0100000000fdffffff02c222480a000000001600149879af465ed7cf0054276217d2e9130767f63691004b26a039000000160014903258c94687540b468c3763f348941fab407af9a7771900";
 
     @Test
     public void testParse() {
@@ -189,6 +190,37 @@ public class PSBTTest {
             else {
                 Assertions.assertTrue(false);
             }
+
+        }
+        catch(Exception e) {
+            Assertions.assertTrue(false);
+        }
+
+    }
+
+    @Test
+    public void testWrite() {
+
+        try {
+
+            Transaction tx = new Transaction(TestNet3Params.get(), Hex.decode(strTx));
+
+            PSBT psbt = new PSBT(tx);
+
+            psbt.addInput((byte)0x01, null, Hex.decode("c0496e0a0000000016001407af7cfec745600da9bffebc6a1db29d42ea9ace"));
+            psbt.addInput((byte)0x06, Hex.decode("02f6017fe8a221d141ce5fe7fbd3636f5945434246b5a02cc4cfc4b58bb3b2c3fc"), Hex.decode("0d8c85ab5400008001000080000000800000000008000000"));
+            psbt.addInputSeparator();
+
+            psbt.addInput((byte)0x01, null, Hex.decode("d32400a039000000160014c583f828737798ee6ab85b1d919339bebec95cd0"));
+            psbt.addInput((byte)0x06, Hex.decode("02155f4832772adb0d18cffbe94a8a97bcb1d952c68ab1992e94808da7ae1a8cb0"), Hex.decode("0d8c85ab5400008001000080000000800100000004000000"));
+            psbt.addInputSeparator();
+
+            psbt.addOutput((byte)0x02, Hex.decode("02f45169db34c54a85f36bb454bf0782d6d0b0e8ec6b8e2c4b973ab6d58553a202"), Hex.decode("0d8c85ab5400008001000080000000800100000005000000"));
+            psbt.addOutputSeparator();
+            psbt.addOutputSeparator();
+
+            byte[] psbtOutBuf = psbt.serialize();
+            Assertions.assertTrue(org.bouncycastle.util.encoders.Hex.toHexString(psbtOutBuf).toLowerCase().equals(strPSBT.replaceAll(" ", "").toLowerCase()));
 
         }
         catch(Exception e) {
