@@ -3,7 +3,7 @@ package com.samourai.wallet.psbt;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.psbt.PSBT;
 import com.samourai.wallet.psbt.PSBTEntry;
-import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bouncycastle.util.encoders.Hex;
 import org.bitcoinj.crypto.MnemonicException;
@@ -199,7 +199,7 @@ public class PSBTTest {
     }
 
     @Test
-    public void testWrite() {
+    public void testRawWrite() {
 
         try {
 
@@ -217,6 +217,36 @@ public class PSBTTest {
 
             psbt.addOutput((byte)0x02, Hex.decode("02f45169db34c54a85f36bb454bf0782d6d0b0e8ec6b8e2c4b973ab6d58553a202"), Hex.decode("0d8c85ab5400008001000080000000800100000005000000"));
             psbt.addOutputSeparator();
+            psbt.addOutputSeparator();
+
+            byte[] psbtOutBuf = psbt.serialize();
+            Assertions.assertTrue(org.bouncycastle.util.encoders.Hex.toHexString(psbtOutBuf).toLowerCase().equals(strPSBT.replaceAll(" ", "").toLowerCase()));
+
+        }
+        catch(Exception e) {
+            Assertions.assertTrue(false);
+        }
+
+    }
+
+    @Test
+    public void testWalletWrite() {
+
+        ECKey eckeyInput0 = ECKey.fromPublicOnly(Hex.decode("02f6017fe8a221d141ce5fe7fbd3636f5945434246b5a02cc4cfc4b58bb3b2c3fc"));
+        ECKey eckeyInput1 = ECKey.fromPublicOnly(Hex.decode("02155f4832772adb0d18cffbe94a8a97bcb1d952c68ab1992e94808da7ae1a8cb0"));
+        ECKey eckeyOutput0 = ECKey.fromPublicOnly(Hex.decode("02f45169db34c54a85f36bb454bf0782d6d0b0e8ec6b8e2c4b973ab6d58553a202"));
+
+        try {
+
+            Transaction tx = new Transaction(TestNet3Params.get(), Hex.decode(strTx));
+
+            PSBT psbt = new PSBT(tx);
+
+            psbt.addInput(TestNet3Params.get(), Hex.decode("0d8c85ab"), eckeyInput0, 175000000L, 84, 1, 0, 0, 8);
+            psbt.addInput(TestNet3Params.get(), Hex.decode("0d8c85ab"), eckeyInput1, 247497499859L, 84, 1, 0, 1, 4);
+
+            psbt.addOutput(TestNet3Params.get(), Hex.decode("0d8c85ab"), eckeyOutput0, 84, 1, 0, 1, 5);
+            // add trailing separator
             psbt.addOutputSeparator();
 
             byte[] psbtOutBuf = psbt.serialize();
