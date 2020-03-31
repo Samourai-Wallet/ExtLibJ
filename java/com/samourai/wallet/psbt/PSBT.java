@@ -1,5 +1,6 @@
 package com.samourai.wallet.psbt;
 
+import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.Z85;
 
@@ -389,8 +390,26 @@ public class PSBT {
     //
     // writer
     //
+    public void addInput(NetworkParameters params, byte[] fingerprint, ECKey eckey, long amount, int purpose, int type, int account, int chain, int index) throws Exception    {
+        SegwitAddress segwitAddress = new SegwitAddress(eckey, params);
+        byte[] redeemScriptBuf = new byte[1 + segwitAddress.segWitRedeemScript().getProgram().length];
+        redeemScriptBuf[0] = (byte)0x16;
+        System.arraycopy(segwitAddress.segWitRedeemScript().getProgram(), 0, redeemScriptBuf, 1, segwitAddress.segWitRedeemScript().getProgram().length);
+
+        byte[] utxoBuf = writeSegwitInputUTXO(amount, redeemScriptBuf);
+
+        addInput((byte)0x01, null, utxoBuf);
+        addInput((byte)0x06, eckey.getPubKey(), writeBIP32Derivation(fingerprint, purpose, type, account, chain, index));
+        addInputSeparator();
+    }
+
     public void addInput(byte type, byte[] keydata, byte[] data) throws Exception {
         psbtInputs.add(populateEntry(type, keydata, data));
+    }
+
+    public void addOutput(NetworkParameters params, byte[] fingerprint, ECKey eckey, int purpose, int type, int account, int chain, int index) throws Exception    {
+        addOutput((byte)0x02, eckey.getPubKey(), writeBIP32Derivation(fingerprint, purpose, type, account, chain, index));
+        addOutputSeparator();
     }
 
     public void addOutput(byte type, byte[] keydata, byte[] data) throws Exception {
