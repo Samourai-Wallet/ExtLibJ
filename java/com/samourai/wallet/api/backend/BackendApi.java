@@ -6,6 +6,10 @@ import com.samourai.wallet.api.backend.beans.RefreshTokenResponse;
 import com.samourai.wallet.api.backend.beans.UnspentResponse;
 import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Function;
 import java8.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,52 +42,70 @@ public class BackendApi implements OAuthApi {
     }
   }
 
-  public List<UnspentResponse.UnspentOutput> fetchUtxos(String zpub) throws Exception {
+  public Observable<List<UnspentResponse.UnspentOutput>> fetchUtxos(String zpub) throws Exception {
     String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpub);
     if (log.isDebugEnabled()) {
       log.debug("fetchUtxos: " + url);
     }
     Map<String,String> headers = computeHeaders();
-    UnspentResponse unspentResponse = httpClient.getJson(url, UnspentResponse.class, headers);
-    List<UnspentResponse.UnspentOutput> unspentOutputs =
-        new ArrayList<UnspentResponse.UnspentOutput>();
-    if (unspentResponse.unspent_outputs != null) {
-      unspentOutputs = Arrays.asList(unspentResponse.unspent_outputs);
-    }
-    return unspentOutputs;
+    Observable<Optional<UnspentResponse>> observable = httpClient.getJson(url, UnspentResponse.class, headers);
+    return observable.map(new Function<Optional<UnspentResponse>, List<UnspentResponse.UnspentOutput>>() {
+      @Override
+      public List<UnspentResponse.UnspentOutput> apply(Optional<UnspentResponse> unspentResponseOptional) throws Exception {
+        List<UnspentResponse.UnspentOutput> unspentOutputs = new ArrayList<UnspentResponse.UnspentOutput>();
+
+        UnspentResponse unspentResponse = unspentResponseOptional.get();
+        if (unspentResponse.unspent_outputs != null) {
+          unspentOutputs = Arrays.asList(unspentResponse.unspent_outputs);
+        }
+        return unspentOutputs;
+      }
+    });
   }
 
-  public List<MultiAddrResponse.Address> fetchAddresses(String zpub) throws Exception {
+  public Observable<List<MultiAddrResponse.Address>> fetchAddresses(String zpub) throws Exception {
     String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpub);
     if (log.isDebugEnabled()) {
       log.debug("fetchAddress: " + url);
     }
     Map<String,String> headers = computeHeaders();
-    MultiAddrResponse multiAddrResponse = httpClient.getJson(url, MultiAddrResponse.class, headers);
-    List<MultiAddrResponse.Address> addresses = new ArrayList<MultiAddrResponse.Address>();
-    if (multiAddrResponse.addresses != null) {
-      addresses = Arrays.asList(multiAddrResponse.addresses);
-    }
-    return addresses;
+    Observable<Optional<MultiAddrResponse>> observable = httpClient.getJson(url, MultiAddrResponse.class, headers);
+    return observable.map(new Function<Optional<MultiAddrResponse>, List<MultiAddrResponse.Address>>() {
+      @Override
+      public List<MultiAddrResponse.Address> apply(Optional<MultiAddrResponse> multiAddrResponseOptional) throws Exception {
+        List<MultiAddrResponse.Address> addresses = new ArrayList<MultiAddrResponse.Address>();
+
+        MultiAddrResponse multiAddrResponse = multiAddrResponseOptional.get();
+        if (multiAddrResponse.addresses != null) {
+          addresses = Arrays.asList(multiAddrResponse.addresses);
+        }
+        return addresses;
+      }
+    });
   }
 
-  public MultiAddrResponse.Address fetchAddress(String zpub) throws Exception {
-    List<MultiAddrResponse.Address> addresses = fetchAddresses(zpub);
-    if (addresses.size() != 1) {
-      throw new Exception("Address count=" + addresses.size());
-    }
-    MultiAddrResponse.Address address = addresses.get(0);
+  public Observable<MultiAddrResponse.Address> fetchAddress(final String zpub) throws Exception {
+    Observable<List<MultiAddrResponse.Address>> observable = fetchAddresses(zpub);
+    return observable.map(new Function<List<MultiAddrResponse.Address>, MultiAddrResponse.Address>() {
+      @Override
+      public MultiAddrResponse.Address apply(List<MultiAddrResponse.Address> addresses) throws Exception {
+        if (addresses.size() != 1) {
+          throw new Exception("Address count=" + addresses.size());
+        }
+        MultiAddrResponse.Address address = addresses.get(0);
 
-    if (log.isDebugEnabled()) {
-      log.debug(
-          "fetchAddress "
-              + zpub
-              + ": account_index="
-              + address.account_index
-              + ", change_index="
-              + address.change_index);
-    }
-    return address;
+        if (log.isDebugEnabled()) {
+          log.debug(
+                  "fetchAddress "
+                          + zpub
+                          + ": account_index="
+                          + address.account_index
+                          + ", change_index="
+                          + address.change_index);
+        }
+        return address;
+      }
+    });
   }
 
   public void initBip84(String zpub) throws Exception {
@@ -99,14 +121,20 @@ public class BackendApi implements OAuthApi {
     httpClient.postUrlEncoded(url, Void.class, headers, postBody);
   }
 
-  public MinerFee fetchMinerFee() throws Exception {
+  public Observable<MinerFee> fetchMinerFee() throws Exception {
     String url = computeAuthUrl(urlBackend + URL_MINER_FEES);
     Map<String,String> headers = computeHeaders();
-    Map<String, Integer> feeResponse = httpClient.getJson(url, Map.class, headers);
-    if (feeResponse == null) {
-      throw new Exception("Invalid miner fee response from server");
-    }
-    return new MinerFee(feeResponse);
+    Observable<Optional<Map>> observable = httpClient.getJson(url, Map.class, headers);
+    return observable.map(new Function<Optional<Map>, MinerFee>() {
+      @Override
+      public MinerFee apply(Optional<Map> feeResponseOptional) throws Exception {
+        Map<String, Integer> feeResponse = feeResponseOptional.get();
+        if (feeResponse == null) {
+          throw new Exception("Invalid miner fee response from server");
+        }
+        return new MinerFee(feeResponse);
+      }
+    });
   }
 
   public void pushTx(String txHex) throws Exception {
@@ -172,36 +200,46 @@ public class BackendApi implements OAuthApi {
   // OAuthAPI
 
   @Override
-  public RefreshTokenResponse.Authorization oAuthAuthenticate(String apiKey) throws Exception {
+  public Observable<RefreshTokenResponse.Authorization> oAuthAuthenticate(String apiKey) throws Exception {
     String url = getUrlBackend() + URL_GET_AUTH_LOGIN;
     if (log.isDebugEnabled()) {
       log.debug("tokenAuthenticate");
     }
     Map<String, String> postBody = new HashMap<String, String>();
     postBody.put("apikey", apiKey);
-    RefreshTokenResponse response =
+    Observable<Optional<RefreshTokenResponse>> observable =
             getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null|| StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations;
+    return observable.map(new Function<Optional<RefreshTokenResponse>, RefreshTokenResponse.Authorization>() {
+      @Override
+      public RefreshTokenResponse.Authorization apply(Optional<RefreshTokenResponse> refreshTokenResponseOptional) throws Exception {
+        RefreshTokenResponse response = refreshTokenResponseOptional.get();
+        if (response.authorizations == null|| StringUtils.isEmpty(response.authorizations.access_token)) {
+          throw new Exception("Authorization refused. Invalid apiKey?");
+        }
+        return response.authorizations;
+      }
+    });
   }
 
   @Override
-  public String oAuthRefresh(String refreshTokenStr) throws Exception {
+  public Observable<String> oAuthRefresh(String refreshTokenStr) throws Exception {
     String url = getUrlBackend() + URL_GET_AUTH_REFRESH;
     if (log.isDebugEnabled()) {
       log.debug("tokenRefresh");
     }
     Map<String, String> postBody = new HashMap<String, String>();
     postBody.put("rt", refreshTokenStr);
-    RefreshTokenResponse response =
+    Observable<Optional<RefreshTokenResponse>> observable =
             getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null || StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations.access_token;
+    return observable.map(new Function<Optional<RefreshTokenResponse>, String>() {
+      @Override
+      public String apply(Optional<RefreshTokenResponse> refreshTokenResponseOptional) throws Exception {
+        RefreshTokenResponse response = refreshTokenResponseOptional.get();
+        if (response.authorizations == null || StringUtils.isEmpty(response.authorizations.access_token)) {
+          throw new Exception("Authorization refused. Invalid apiKey?");
+        }
+        return response.authorizations.access_token;
+      }
+    });
   }
 }

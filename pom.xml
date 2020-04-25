@@ -52,6 +52,11 @@
 			<version>1.7.0</version>
 		</dependency>
 		<dependency>
+			<groupId>io.reactivex.rxjava2</groupId>
+			<artifactId>rxjava</artifactId>
+			<version>2.2.15</version>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-launcher</artifactId>
 			<version>1.2.0</version>
